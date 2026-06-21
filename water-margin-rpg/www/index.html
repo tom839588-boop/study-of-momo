@@ -6,747 +6,894 @@
 <title>水浒英雄传</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-@font-face{font-family:'GameFont';src:local('STKaiti'),local('KaiTi'),local('Noto Serif SC'),serif}
-html,body{width:100%;height:100%;overflow:hidden;font-family:'GameFont','STKaiti','KaiTi','SimSun',serif;background:#1a0e0a;color:#f5e6c8;font-size:16px}
-#game{width:100%;height:100%;display:flex;flex-direction:column;position:relative;background:linear-gradient(180deg,#1a0e0a 0%,#2d1810 50%,#1a0e0a 100%)}
+@font-face{font-family:'GF';src:local('STKaiti'),local('KaiTi'),serif}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'GF','STKaiti','KaiTi','SimSun',serif;background:#0d0806;color:#f5e6c8;font-size:16px}
+#g{width:100%;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
 
-/* Title Screen */
-#titleScreen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:linear-gradient(180deg,#0d0806 0%,#1a0e0a 40%,#2d1810 70%,#0d0806 100%)}
-#titleScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center bottom,rgba(200,50,30,.15) 0%,transparent 70%)}
-.title-logo{font-size:clamp(32px,8vw,56px);color:#dc2626;text-shadow:0 0 30px rgba(220,38,38,.4),0 4px 8px rgba(0,0,0,.5);letter-spacing:8px;font-weight:bold;z-index:1}
-.title-sub{font-size:clamp(14px,3.5vw,18px);color:#b8860b;margin-top:8px;letter-spacing:4px;opacity:.8;z-index:1}
-.title-btn{background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;color:#f5e6c8;font-size:clamp(18px,4.5vw,24px);padding:14px 48px;border-radius:8px;margin-top:48px;font-family:inherit;letter-spacing:4px;cursor:pointer;box-shadow:0 4px 20px rgba(220,38,38,.3);transition:.2s;z-index:1;touch-action:manipulation}
-.title-btn:active{transform:scale(.95);box-shadow:0 2px 10px rgba(220,38,38,.2)}
-.title-credit{position:absolute;bottom:20px;color:#666;font-size:12px;z-index:1}
+/* Title */
+#titleS{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:radial-gradient(ellipse at center,#1a0e0a,#0d0806)}
+.tl{font-size:clamp(42px,10vw,72px);color:#dc2626;text-shadow:0 0 40px rgba(220,38,38,.3);letter-spacing:12px;font-weight:bold}
+.ts{font-size:clamp(14px,3.5vw,18px);color:#b8860b;margin-top:8px;letter-spacing:4px;opacity:.7}
+.tb{background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;color:#f5e6c8;font-size:clamp(20px,5vw,26px);padding:16px 56px;margin-top:32px;border-radius:4px;font-family:inherit;letter-spacing:6px;cursor:pointer;box-shadow:0 4px 24px rgba(220,38,38,.3);touch-action:manipulation}
+.tb:active{transform:scale(.95)}
+.th{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap;justify-content:center;z-index:1}
+.th span{font-size:clamp(20px,4.5vw,28px);animation:tf 2s ease-in-out infinite;animation-delay:calc(var(--i)*.12s)}
+@keyframes tf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.tc{position:absolute;bottom:16px;color:#444;font-size:11px;letter-spacing:2px}
 
-/* Battle Screen */
-#battleScreen{display:none;flex-direction:column;height:100%;position:relative}
-.battle-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.4);border-bottom:1px solid rgba(220,38,38,.2);z-index:10}
-.battle-header .level-name{font-size:clamp(14px,3.5vw,18px);color:#dc2626;letter-spacing:2px}
-.battle-header .level-num{font-size:12px;color:#888}
+/* Screens */
+.screen{display:none;position:absolute;inset:0;flex-direction:column;background:linear-gradient(180deg,#0d0806,#1a0e0a,#0d0806)}
+.screen.active{display:flex}
 
-/* Enemy Area */
-.enemy-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;position:relative;min-height:0}
-.enemy-area::after{content:'';position:absolute;bottom:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(220,38,38,.3),transparent)}
-.enemy-row{display:flex;justify-content:center;gap:clamp(8px,3vw,16px);flex-wrap:wrap;padding:4px}
-.enemy-unit{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:8px;transition:.15s;touch-action:manipulation;min-width:70px}
-.enemy-unit:active{background:rgba(220,38,38,.15)}
-.enemy-unit.targetable{animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}50%{box-shadow:0 0 0 6px rgba(220,38,38,0)}}
-.enemy-icon{width:clamp(40px,10vw,56px);height:clamp(40px,10vw,56px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5vw,28px);border:2px solid rgba(200,50,30,.5);background:rgba(0,0,0,.3)}
-.enemy-name{font-size:clamp(11px,2.8vw,14px);color:#e8d5b0;text-align:center;white-space:nowrap}
-.hp-bar{width:clamp(50px,14vw,80px);height:5px;background:#333;border-radius:3px;overflow:hidden}
-.hp-bar-fill{height:100%;background:linear-gradient(90deg,#dc2626,#ef4444);border-radius:3px;transition:width .3s}
-.enemy-hp-text{font-size:10px;color:#999}
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(220,38,38,.15);z-index:10;flex-shrink:0}
+.hdr .ht{font-size:clamp(14px,3.5vw,18px);color:#dc2626;letter-spacing:2px}
+.hdr .hs{font-size:11px;color:#888}
 
-/* Log Area */
-.log-area{padding:8px 12px;min-height:clamp(48px,10vw,60px);display:flex;align-items:center;background:rgba(0,0,0,.3);border-top:1px solid rgba(220,38,38,.15);border-bottom:1px solid rgba(220,38,38,.15);z-index:5}
-.log-text{font-size:clamp(13px,3.2vw,16px);color:#f5e6c8;line-height:1.5;opacity:0;transition:opacity .2s;width:100%;text-align:center}
-.log-text.show{opacity:1}
+/* Map/Explore */
+#mapS .map-bg{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 20 Q10 10 20 20 Q30 30 40 20' stroke='%23b8860b' fill='none' stroke-width='.5'/%3E%3C/svg%3E") repeat;opacity:.06;pointer-events:none}
+.map-grid{flex:1;overflow-y:auto;padding:8px;z-index:2;display:flex;flex-direction:column;gap:6px}
+.map-node{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(220,38,38,.15);border-radius:4px;background:rgba(0,0,0,.3);cursor:pointer;transition:.15s;touch-action:manipulation;position:relative}
+.map-node:active{background:rgba(220,38,38,.1)}
+.map-node.locked{opacity:.35;pointer-events:none}
+.map-node.cleared{border-color:rgba(74,222,128,.2)}
+.map-node.cleared .mn-status{color:#4ade80}
+.map-node.curr{box-shadow:inset 0 0 0 1px #dc2626}
+.map-node.curr .mn-status{color:#dc2626}
+.mn-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid currentColor;flex-shrink:0}
+.mn-info{flex:1;min-width:0}
+.mn-name{font-size:clamp(14px,3.5vw,17px);color:#f5e6c8;letter-spacing:2px}
+.mn-sub{font-size:11px;color:#666;margin-top:2px}
+.mn-status{font-size:10px;margin-top:1px}
+.mn-lv{font-size:10px;color:#555}
 
-/* Hero Area */
-.hero-area{display:flex;gap:6px;padding:6px 8px;background:rgba(0,0,0,.3);flex-wrap:wrap;justify-content:center;z-index:5;border-top:1px solid rgba(220,38,38,.1)}
-.hero-unit{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.4);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:4px 8px;flex:1;min-width:0;max-width:48%}
-.hero-unit .hero-icon{font-size:clamp(18px,4vw,24px);flex-shrink:0}
-.hero-unit .hero-info{flex:1;min-width:0}
-.hero-unit .hero-name{font-size:clamp(11px,2.8vw,14px);color:#dc2626}
-.hero-unit .hero-stat-bar{height:4px;background:#333;border-radius:2px;margin-top:2px;overflow:hidden}
-.hero-unit .hero-stat-fill{height:100%;border-radius:2px;transition:width .3s}
-.hero-unit .hero-stat-fill.hp{background:linear-gradient(90deg,#dc2626,#ef4444)}
-.hero-unit .hero-stat-fill.sp{background:linear-gradient(90deg,#2563eb,#3b82f6)}
-.hero-unit .hero-stat-text{font-size:9px;color:#888;display:flex;justify-content:space-between}
+/* Explore screen */
+#expS .exp-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,4vw,32px);position:relative}
+.exp-scene{position:absolute;inset:0;opacity:.1;pointer-events:none;overflow:hidden}
+.exp-info{text-align:center;z-index:2;width:100%}
+.exp-title{font-size:clamp(20px,5vw,28px);color:#b8860b;letter-spacing:4px;margin-bottom:8px}
+.exp-desc{font-size:clamp(13px,3.2vw,16px);color:#e8d5b0;line-height:1.6;margin-bottom:24px;opacity:.7}
+.exp-stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;font-size:clamp(12px,3vw,15px);color:#888}
+.exp-stats span{color:#f5e6c8}
+.exp-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.exp-btn{padding:14px;border:1px solid rgba(220,38,38,.2);border-radius:4px;background:rgba(0,0,0,.3);color:#f5e6c8;font-size:clamp(15px,3.8vw,18px);font-family:inherit;letter-spacing:2px;cursor:pointer;touch-action:manipulation;text-align:center}
+.exp-btn:active{background:rgba(220,38,38,.15);transform:scale(.98)}
+.exp-btn.bt2{border-color:rgba(59,130,246,.2)}
+.exp-btn.bt3{border-color:rgba(74,222,128,.2)}
+.exp-btn.bt4{border-color:rgba(234,179,8,.2)}
 
-/* Action Buttons */
-.action-bar{display:flex;gap:8px;padding:8px 12px 12px;background:rgba(0,0,0,.4);z-index:5}
-.action-btn{flex:1;padding:clamp(10px,2.5vw,14px);border:1px solid rgba(220,38,38,.3);border-radius:6px;background:linear-gradient(135deg,rgba(220,38,38,.1),rgba(220,38,38,.05));color:#f5e6c8;font-size:clamp(14px,3.5vw,18px);font-family:inherit;letter-spacing:2px;cursor:pointer;transition:.15s;touch-action:manipulation;text-align:center}
-.action-btn:active{background:rgba(220,38,38,.25);transform:scale(.97)}
-.action-btn.defend{border-color:rgba(59,130,246,.3);background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.05))}
-.action-btn.defend:active{background:rgba(59,130,246,.25)}
-.action-btn.skill{border-color:rgba(234,179,8,.3);background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(234,179,8,.05))}
-.action-btn.skill:active{background:rgba(234,179,8,.25)}
-.action-btn:disabled{opacity:.3;pointer-events:none}
+/* Battle */
+.battle-field{flex:1;display:flex;flex-direction:column;position:relative;min-height:0}
+.battle-bg{position:absolute;inset:0;pointer-events:none}
+.enemy-area{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;position:relative}
+.enemy-area::after{content:'';position:absolute;bottom:0;left:15%;width:70%;height:1px;background:linear-gradient(90deg,transparent,rgba(220,38,38,.2),transparent)}
+.e-row{display:flex;justify-content:center;gap:clamp(6px,2.5vw,14px);flex-wrap:wrap}
+.e-unit{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 8px;border-radius:4px;transition:.15s;touch-action:manipulation;min-width:clamp(60px,16vw,85px);position:relative}
+.e-unit:active{background:rgba(220,38,38,.08)}
+.e-unit.tg{animation:tp .8s infinite}
+@keyframes tp{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.25)}50%{box-shadow:0 0 0 8px rgba(220,38,38,0)}}
+.e-sprite{width:clamp(44px,11vw,60px);height:clamp(44px,11vw,60px);display:flex;align-items:center;justify-content:center;font-size:clamp(28px,7vw,38px)}
+.e-icon{filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.e-name{font-size:clamp(11px,2.8vw,14px);color:#e8d5b0;text-align:center}
+.hp-b{width:clamp(50px,14vw,80px);height:4px;background:#222;border-radius:2px;overflow:hidden}
+.hp-f{height:100%;background:linear-gradient(90deg,#dc2626,#ef4444);border-radius:2px;transition:width .3s}
+.e-hpt{font-size:9px;color:#888}
 
-/* Skill Selection Panel */
-.skill-panel{display:none;gap:6px;padding:8px 12px 12px;background:rgba(0,0,0,.5);z-index:5;flex-wrap:wrap}
-.skill-panel.show{display:flex}
-.skill-btn{flex:1;min-width:45%;padding:clamp(10px,2.5vw,14px);border:1px solid rgba(234,179,8,.3);border-radius:6px;background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(234,179,8,.05));color:#f5e6c8;font-size:clamp(13px,3vw,16px);font-family:inherit;cursor:pointer;transition:.15s;touch-action:manipulation;text-align:center}
-.skill-btn:active{background:rgba(234,179,8,.25);transform:scale(.97)}
-.skill-btn:disabled{opacity:.3;pointer-events:none}
-.skill-btn .skill-name{display:block;letter-spacing:1px}
-.skill-btn .skill-cost{display:block;font-size:10px;color:#888;margin-top:2px}
-.back-btn{flex:0 0 auto;padding:clamp(10px,2.5vw,14px) 16px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:transparent;color:#888;font-size:clamp(13px,3vw,16px);font-family:inherit;cursor:pointer;touch-action:manipulation}
+/* Log */
+.log-a{padding:6px 10px;min-height:clamp(44px,10vw,56px);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);z-index:5;border-top:1px solid rgba(220,38,38,.1);border-bottom:1px solid rgba(220,38,38,.1);flex-shrink:0}
+.log-t{font-size:clamp(13px,3.2vw,16px);color:#f5e6c8;line-height:1.5;text-align:center;opacity:0;transition:opacity .2s}
+.log-t.s{opacity:1}
 
-/* Story Screen */
-#storyScreen{display:none;position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.85);flex-direction:column;align-items:center;justify-content:center;padding:clamp(20px,5vw,40px)}
-.story-content{max-width:500px;width:100%}
-.story-title{font-size:clamp(20px,5vw,28px);color:#dc2626;text-align:center;letter-spacing:4px;margin-bottom:24px}
-.story-text{font-size:clamp(15px,3.8vw,18px);color:#f5e6c8;line-height:1.8;letter-spacing:1px;text-indent:2em;margin-bottom:16px;opacity:0;transform:translateY(10px);transition:all .5s}
-.story-text.show{opacity:1;transform:translateY(0)}
-.story-text.new-hero{color:#b8860b;text-indent:0;text-align:center}
-.story-continue{display:none;margin-top:24px;padding:12px 36px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:6px;color:#f5e6c8;font-size:clamp(16px,4vw,20px);font-family:inherit;letter-spacing:2px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 20px rgba(220,38,38,.3)}
-.story-continue:active{transform:scale(.95)}
-.story-continue.show{display:block}
+/* Hero stats */
+.hero-s{display:flex;gap:3px;padding:4px 6px;background:rgba(0,0,0,.4);flex-wrap:wrap;z-index:5;flex-shrink:0}
+.h-card{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.4);border:1px solid rgba(220,38,38,.12);border-radius:3px;padding:3px 6px;flex:1;min-width:0;max-width:50%}
+.h-card .hc-i{font-size:clamp(14px,3.5vw,20px);flex-shrink:0;width:clamp(22px,5vw,30px);text-align:center}
+.h-card .hc-info{flex:1;min-width:0}
+.h-card .hc-n{font-size:clamp(10px,2.4vw,13px);color:#dc2626}
+.h-card .hc-b{height:3px;background:#222;border-radius:2px;margin-top:1px;overflow:hidden}
+.h-card .hc-f{height:100%;border-radius:2px;transition:width .3s}
+.h-card .hc-f.h{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.h-card .hc-f.s{background:linear-gradient(90deg,#2563eb,#3b82f6)}
+.h-card .hc-t{font-size:8px;color:#666;display:flex;justify-content:space-between;line-height:1.2}
 
-/* Result Screen */
-#resultScreen{display:none;position:absolute;inset:0;z-index:80;background:rgba(0,0,0,.85);flex-direction:column;align-items:center;justify-content:center;padding:clamp(20px,5vw,40px)}
-.result-title{font-size:clamp(28px,7vw,40px);letter-spacing:6px;margin-bottom:16px}
-.result-title.victory{color:#b8860b;text-shadow:0 0 30px rgba(184,134,11,.4)}
-.result-title.defeat{color:#dc2626;text-shadow:0 0 30px rgba(220,38,38,.4)}
-.result-detail{font-size:clamp(14px,3.5vw,18px);color:#e8d5b0;margin-bottom:8px}
-.result-new-hero{font-size:clamp(16px,4vw,20px);color:#b8860b;margin:16px 0}
-.result-btn{margin-top:24px;padding:12px 36px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:6px;color:#f5e6c8;font-size:clamp(16px,4vw,20px);font-family:inherit;letter-spacing:2px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 20px rgba(220,38,38,.3)}
-.result-btn:active{transform:scale(.95)}
+/* Actions */
+.act-b{display:flex;gap:5px;padding:6px 8px 10px;background:rgba(0,0,0,.5);z-index:5;flex-shrink:0}
+.act-btn{flex:1;padding:clamp(10px,2.5vw,14px);background:linear-gradient(180deg,rgba(220,38,38,.12),rgba(220,38,38,.05));border:1px solid rgba(220,38,38,.2);border-radius:3px;color:#f5e6c8;font-size:clamp(13px,3.2vw,17px);font-family:inherit;letter-spacing:2px;cursor:pointer;transition:.1s;touch-action:manipulation;text-align:center}
+.act-btn:active{background:rgba(220,38,38,.2);transform:scale(.97)}
+.act-btn.df{border-color:rgba(59,130,246,.2);background:linear-gradient(180deg,rgba(59,130,246,.12),rgba(59,130,246,.05))}
+.act-btn.df:active{background:rgba(59,130,246,.2)}
+.act-btn.sk{border-color:rgba(234,179,8,.2);background:linear-gradient(180deg,rgba(234,179,8,.12),rgba(234,179,8,.05))}
+.act-btn.sk:active{background:rgba(234,179,8,.2)}
+.act-btn:disabled{opacity:.2;pointer-events:none}
 
-/* Damage float */
-.dmg-float{position:fixed;font-size:clamp(20px,5vw,32px);font-weight:bold;pointer-events:none;z-index:200;animation:floatUp .8s ease-out forwards}
-.dmg-float.damage{color:#ef4444;text-shadow:0 0 10px rgba(239,68,68,.5)}
-.dmg-float.heal{color:#22c55e;text-shadow:0 0 10px rgba(34,197,94,.5)}
-.dmg-float.miss{color:#888}
-@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.2)}}
+/* Skill panel */
+.sk-p{display:none;gap:4px;padding:6px 8px 10px;background:rgba(0,0,0,.5);z-index:5;flex-wrap:wrap;flex-shrink:0}
+.sk-p.s{display:flex}
+.sk-btn{flex:1;min-width:46%;padding:clamp(8px,2vw,12px);border:1px solid rgba(234,179,8,.15);border-radius:3px;background:linear-gradient(180deg,rgba(234,179,8,.06),transparent);color:#f5e6c8;font-size:clamp(12px,3vw,15px);font-family:inherit;cursor:pointer;transition:.1s;touch-action:manipulation;text-align:center}
+.sk-btn:active{background:rgba(234,179,8,.15);transform:scale(.97)}
+.sk-btn:disabled{opacity:.2;pointer-events:none}
+.sk-btn .skn{display:block;letter-spacing:1px}
+.sk-btn .skc{display:block;font-size:9px;color:#666;margin-top:1px}
+.bk-btn{padding:clamp(8px,2vw,12px) 12px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#555;font-size:clamp(12px,3vw,15px);font-family:inherit;cursor:pointer;touch-action:manipulation;flex-shrink:0}
 
-/* Shake animation */
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-.shake{animation:shake .3s}
+/* Story */
+#storyS{background:rgba(0,0,0,.85);justify-content:flex-end;padding:clamp(16px,4vw,32px)}
+.story-b{background:rgba(13,8,6,.95);border:1px solid rgba(220,38,38,.15);border-radius:4px;padding:clamp(16px,4vw,24px);max-height:55%;overflow-y:auto}
+.story-b .sti{font-size:clamp(16px,4vw,22px);color:#dc2626;text-align:center;letter-spacing:4px;margin-bottom:14px}
+.story-b .sl{font-size:clamp(14px,3.5vw,17px);color:#f5e6c8;line-height:2;text-indent:2em;margin-bottom:6px;opacity:0;transition:opacity .4s}
+.story-b .sl.s{opacity:1}
+.story-b .sl.nh{color:#b8860b;text-indent:0;text-align:center}
+.story-btn{margin-top:14px;padding:10px 32px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:3px;color:#f5e6c8;font-size:clamp(15px,3.8vw,18px);font-family:inherit;letter-spacing:4px;cursor:pointer;display:none;touch-action:manipulation;width:100%}
+.story-btn.s{display:block}
+.story-btn:active{transform:scale(.98)}
 
-/* Flash */
-@keyframes flash{0%,100%{opacity:1}50%{opacity:.3}}
-.flash{animation:flash .15s}
+/* Result */
+#resultS{align-items:center;justify-content:center;background:rgba(0,0,0,.88);padding:clamp(20px,5vw,40px)}
+.ri{font-size:clamp(48px,12vw,72px);margin-bottom:12px}
+.rt{font-size:clamp(28px,7vw,42px);letter-spacing:6px;margin-bottom:10px}
+.rt.w{color:#b8860b;text-shadow:0 0 30px rgba(184,134,11,.3)}
+.rt.l{color:#dc2626;text-shadow:0 0 30px rgba(220,38,38,.3)}
+.rd{font-size:clamp(14px,3.5vw,18px);color:#e8d5b0;margin-bottom:4px;text-align:center}
+.rn{font-size:clamp(16px,4vw,20px);color:#b8860b;margin:10px 0;text-align:center}
+.rb{margin-top:16px;padding:12px 40px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:3px;color:#f5e6c8;font-size:clamp(16px,4vw,20px);font-family:inherit;letter-spacing:4px;cursor:pointer;touch-action:manipulation;width:80%;max-width:280px;text-align:center}
+.rb:active{transform:scale(.97)}
 
-/* Level Complete transition */
-@keyframes fadeOutUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-30px)}}
+/* Reward */
+#rewardS{align-items:center;justify-content:center;padding:clamp(20px,5vw,40px);background:rgba(0,0,0,.85)}
+.reward-b{background:rgba(13,8,6,.9);border:1px solid rgba(184,134,11,.2);border-radius:4px;padding:clamp(20px,5vw,28px);max-width:340px;width:100%;text-align:center}
+.reward-b .rw-title{font-size:clamp(18px,4.5vw,22px);color:#b8860b;letter-spacing:4px;margin-bottom:16px}
+.reward-b .rw-item{font-size:clamp(14px,3.5vw,17px);color:#e8d5b0;padding:8px 0;border-bottom:1px solid rgba(184,134,11,.1)}
+.reward-b .rw-btn{margin-top:16px;padding:10px 32px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:3px;color:#f5e6c8;font-size:clamp(15px,3.8vw,18px);font-family:inherit;letter-spacing:4px;cursor:pointer;width:100%}
+.reward-b .rw-btn:active{transform:scale(.98)}
 
-/* Scrollbar hide */
-::-webkit-scrollbar{width:0;height:0}
-
-/* Notification badge (for new hero join) */
-.hero-join-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#22c55e;border-radius:50%;font-size:10px;color:#fff;display:flex;align-items:center;justify-content:center}
+/* Effects */
+.df{position:fixed;font-size:clamp(22px,5.5vw,34px);font-weight:bold;pointer-events:none;z-index:200;animation:dfu .7s ease-out forwards;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+.df.d{color:#ef4444}
+.df.h{color:#22c55e}
+@keyframes dfu{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.3)}}
+.sk{animation:sk .25s}
+@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.fl{animation:fl .12s}
+@keyframes fl{0%,100%{opacity:1}50%{opacity:.2}}
+::-webkit-scrollbar{width:0}
+.sbg-m{background:linear-gradient(180deg,#1a1810,#2d2818,#1a1810)}
+.sbg-c{background:linear-gradient(180deg,#1a1010,#2d1818,#1a1010)}
+.sbg-s{background:linear-gradient(180deg,#181a1e,#20242d,#181a1e)}
+.sbg-p{background:linear-gradient(180deg,#1a1a10,#2d2d18,#1a1a10)}
+.sbg-f{background:linear-gradient(180deg,#1a1010,#302020,#1a1010)}
+.sbg-w{background:linear-gradient(180deg,#100808,#201010,#100808)}
 </style>
 </head>
 <body>
-<div id="game">
-
-<!-- Title Screen -->
-<div id="titleScreen">
-  <div class="title-logo">水浒英雄传</div>
-  <div class="title-sub">—— 回合制 RPG ——</div>
-  <button class="title-btn" ontouchstart="" onclick="startGame()">开始闯关</button>
-  <div class="title-credit">单机离线版 · 献给梁山好汉</div>
+<div id="g">
+<div id="titleS">
+  <div class="tl">水浒英雄传</div>
+  <div class="ts">— 回合制角色扮演 —</div>
+  <div class="th"><span style="--i:0">🐯</span><span style="--i:1">🧘</span><span style="--i:2">🗡️</span><span style="--i:3">🪶</span><span style="--i:4">🔥</span><span style="--i:5">🏹</span><span style="--i:6">🪓</span></div>
+  <button class="tb" ontouchstart="" onclick="startGame()">开 始 闯 关</button>
+  <div class="tc">单机离线版</div>
 </div>
 
-<!-- Story Screen -->
-<div id="storyScreen"></div>
-
-<!-- Battle Screen -->
-<div id="battleScreen">
-  <div class="battle-header">
-    <span class="level-name" id="levelName">景阳冈</span>
-    <span class="level-num" id="levelNum">第 1 关</span>
-  </div>
-  <div class="enemy-area" id="enemyArea"></div>
-  <div class="log-area"><div class="log-text" id="logText"></div></div>
-  <div class="hero-area" id="heroArea"></div>
-  <div class="action-bar" id="actionBar">
-    <button class="action-btn" ontouchstart="" onclick="doAction('attack')">⚔️ 攻击</button>
-    <button class="action-btn skill" ontouchstart="" onclick="showSkills()">💥 技能</button>
-    <button class="action-btn defend" ontouchstart="" onclick="doAction('defend')">🛡️ 防御</button>
-  </div>
-  <div class="skill-panel" id="skillPanel"></div>
+<div id="mapS" class="screen">
+  <div class="map-bg"></div>
+  <div class="hdr"><span class="ht">🗺️ 大宋疆域</span><span class="hs" id="mapInfo"></span></div>
+  <div class="map-grid" id="mapGrid"></div>
 </div>
 
-<!-- Result Screen -->
-<div id="resultScreen"></div>
+<div id="expS" class="screen">
+  <div class="hdr"><span class="ht" id="expTitle">—</span><span class="hs" id="expSub"></span></div>
+  <div class="exp-area" id="expArea"></div>
+</div>
 
+<div id="battleS" class="screen">
+  <div class="hdr"><span class="ht" id="btName">战斗</span><span class="hs" id="btChap">—</span></div>
+  <div class="battle-field"><div class="battle-bg" id="btBg"></div>
+  <div class="enemy-area"><div class="e-row" id="eRow"></div></div></div>
+  <div class="log-a"><div class="log-t" id="logT"></div></div>
+  <div class="hero-s" id="heroS"></div>
+  <div class="act-b" id="actB">
+    <button class="act-btn" ontouchstart="" onclick="doA('atk')">⚔️ 攻击</button>
+    <button class="act-btn sk" ontouchstart="" onclick="showSk()">💥 技能</button>
+    <button class="act-btn df" ontouchstart="" onclick="doA('def')">🛡️ 防御</button>
+  </div>
+  <div class="sk-p" id="skP"></div>
+</div>
+
+<div id="storyS" class="screen"></div>
+<div id="resultS" class="screen"></div>
+<div id="rewardS" class="screen"></div>
 </div>
 <script>
 // ===================== DATA =====================
-const HERO_DATA = {
-  wusong:{name:'武松',title:'行者',emoji:'🐯',stats:{hp:500,maxHp:500,atk:85,def:40,sp:50,maxSp:50},
-    skills:[{name:'醉拳',desc:'醉意朦胧，拳法凌厉 ×1.5',cost:15,mult:1.5},{name:'打虎',desc:'赤手空拳，力能伏虎 ×2.2',cost:30,mult:2.2}],
-    joinLv:1,desc:'清河县人氏，排行第二，景阳冈打虎英雄'},
-  luzhishen:{name:'鲁智深',title:'花和尚',emoji:'🧘',stats:{hp:650,maxHp:650,atk:70,def:55,sp:40,maxSp:40},
-    skills:[{name:'倒拔柳',desc:'倒拔垂杨柳，群攻 ×0.8',cost:20,mult:0.8,aoe:true},{name:'金刚身',desc:'铜皮铁骨，自身加防',cost:15,buff:'def',buffAmt:20}],
-    joinLv:2,desc:'提辖官出身，三拳打死镇关西'},
-  linchong:{name:'林冲',title:'豹子头',emoji:'🗡️',stats:{hp:520,maxHp:520,atk:78,def:45,sp:50,maxSp:50},
-    skills:[{name:'梨花枪',desc:'枪出如龙，连击 ×1.2×2',cost:20,mult:1.2,hits:2},{name:'风雪山神',desc:'怒从心起，暴击 ×2.5',cost:35,mult:2.5}],
-    joinLv:3,desc:'八十万禁军教头，被逼上梁山'},
-  wuyong:{name:'吴用',title:'智多星',emoji:'🪶',stats:{hp:380,maxHp:380,atk:55,def:30,sp:70,maxSp:70},
-    skills:[{name:'智取',desc:'巧施妙计，降敌攻击',cost:18,debuff:'atk',debuffAmt:-15},{name:'神机',desc:'运筹帷幄，全队回复 SP',cost:10,healSp:15}],
-    joinLv:4,desc:'梁山军师，人称智多星'},
-  liutang:{name:'刘唐',title:'赤发鬼',emoji:'🔥',stats:{hp:480,maxHp:480,atk:82,def:35,sp:40,maxSp:40},
-    skills:[{name:'赤发',desc:'赤发狂舞，吸血 30%',cost:20,mult:1.3,lifesteal:.3},{name:'拼命',desc:'血越少攻越高 ×1.8~2.8',cost:25,mult:2.2}],
-    joinLv:4,desc:'赤发鬼，智取生辰纲的好汉'},
-  huaron:{name:'花荣',title:'小李广',emoji:'🏹',stats:{hp:420,maxHp:420,atk:88,def:28,sp:45,maxSp:45},
-    skills:[{name:'穿云箭',desc:'百步穿杨，必中 ×1.8',cost:22,mult:1.8},{name:'连珠箭',desc:'三箭连发 ×0.9×3',cost:28,mult:0.9,hits:3}],
-    joinLv:5,desc:'神箭手，百步穿杨'},
-  huyanzhuo:{name:'呼延灼',title:'双鞭将',emoji:'⚔️',stats:{hp:580,maxHp:580,atk:72,def:50,sp:40,maxSp:40},
-    skills:[{name:'连环马',desc:'铁甲连环，群攻 ×0.9',cost:25,mult:0.9,aoe:true},{name:'铁甲',desc:'重甲格挡，大幅加防',cost:12,buff:'def',buffAmt:30}],
-    joinLv:6,desc:'汝宁郡都统制，连环马威震天下'},
-  likui:{name:'李逵',title:'黑旋风',emoji:'🪓',stats:{hp:550,maxHp:550,atk:90,def:25,sp:35,maxSp:35},
-    skills:[{name:'板斧',desc:'双斧狂砍 ×2.0，自伤 10%',cost:20,mult:2.0,selfDmg:.1},{name:'咆哮',desc:'一声怒吼，降敌全防',cost:18,debuff:'def',debuffAmt:-15}],
-    joinLv:7,desc:'江州人氏，李逵手持两把板斧'},
-  gongsunsheng:{name:'公孙胜',title:'入云龙',emoji:'🌪️',stats:{hp:400,maxHp:400,atk:60,def:32,sp:80,maxSp:80},
-    skills:[{name:'天罡',desc:'道法天罡，群伤 ×0.7',cost:30,mult:0.7,aoe:true},{name:'玄术',desc:'奇门遁甲，全体回复',cost:35,healAll:120}],
-    joinLv:8,desc:'罗真人弟子，道号一清先生'}
+const H = {
+  wusong:{n:'武松',t:'行者',e:'🐯',s:{hp:500,atk:85,def:38,sp:50,mhp:500,msp:50},
+    sk:[{n:'醉拳',d:'×1.5 醉拳凌厉',c:15,m:1.5},{n:'打虎',d:'×2.2 力能伏虎',c:28,m:2.2}]},
+  luzh:{n:'鲁智深',t:'花和尚',e:'🧘',s:{hp:650,atk:72,def:55,sp:40,mhp:650,msp:40},
+    sk:[{n:'倒拔柳',d:'群攻×0.8',c:20,m:.8,ao:1},{n:'金刚身',d:'自身加防',c:12,bf:'def',ba:25}]},
+  linch:{n:'林冲',t:'豹子头',e:'🗡️',s:{hp:520,atk:80,def:45,sp:50,mhp:520,msp:50},
+    sk:[{n:'梨花枪',d:'连击×1.2×2',c:18,m:1.2,hi:2},{n:'雪神',d:'×2.5暴击',c:32,m:2.5}]},
+  wuyong:{n:'吴用',t:'智多星',e:'🪶',s:{hp:380,atk:55,def:30,sp:70,mhp:380,msp:70},
+    sk:[{n:'智取',d:'降敌攻击',c:16,db:'atk',da:-15},{n:'神机',d:'全队回SP',c:10,hs:15}]},
+  liut:{n:'刘唐',t:'赤发鬼',e:'🔥',s:{hp:480,atk:84,def:35,sp:40,mhp:480,msp:40},
+    sk:[{n:'赤发',d:'吸血×1.3',c:18,m:1.3,ls:.3},{n:'拼命',d:'×2.4',c:25,m:2.4}]},
+  huar:{n:'花荣',t:'小李广',e:'🏹',s:{hp:420,atk:90,def:28,sp:45,mhp:420,msp:45},
+    sk:[{n:'穿云箭',d:'×1.9必中',c:22,m:1.9},{n:'连珠箭',d:'×0.9×3',c:28,m:.9,hi:3}]},
+  likui:{n:'李逵',t:'黑旋风',e:'🪓',s:{hp:550,atk:92,def:25,sp:35,mhp:550,msp:35},
+    sk:[{n:'板斧',d:'×2.0自伤',c:20,m:2.0,sd:.1},{n:'咆哮',d:'降敌防御',c:16,db:'def',da:-15}]}
 };
 
-const LEVELS = [
-  {id:1,name:'景阳冈打虎',title:'第一章',bg:'山林',
-    story:'武松来到景阳冈前，酒家再三劝阻说冈上有猛虎伤人。\n武松笑道："我武松一生行走江湖，岂惧一只大虫！"',
-    enemies:[{name:'猛虎',emoji:'🐅',hp:300,atk:40,def:15,baseHp:300}],
-    heroes:['wusong'],joinHero:null,rewardExp:50},
-  {id:2,name:'拳打镇关西',title:'第二章',bg:'街市',
-    story:'鲁提辖在酒楼听说镇关西郑屠欺男霸女，怒从心起。\n他来到郑屠的肉铺前，要大块臊子，郑屠不识好歹……',
-    enemies:[{name:'镇关西',emoji:'👺',hp:400,atk:45,def:18,baseHp:400},{name:'喽啰',emoji:'👤',hp:150,atk:30,def:10,baseHp:150},{name:'喽啰',emoji:'👤',hp:150,atk:30,def:10,baseHp:150}],
-    heroes:['wusong','luzhishen'],joinHero:'luzhishen',rewardExp:80},
-  {id:3,name:'风雪山神庙',title:'第三章',bg:'雪地',
-    story:'林冲被高俅陷害，刺配沧州。陆谦等人欲在草料场加害于他。\n林冲忍无可忍，提枪怒道："欺人太甚，今日便叫你们血债血偿！"',
-    enemies:[{name:'陆谦',emoji:'🎭',hp:500,atk:50,def:20,baseHp:500},{name:'差役',emoji:'👤',hp:180,atk:32,def:12,baseHp:180},{name:'差役',emoji:'👤',hp:180,atk:32,def:12,baseHp:180}],
-    heroes:['wusong','luzhishen','linchong'],joinHero:'linchong',rewardExp:120},
-  {id:4,name:'智取生辰纲',title:'第四章',bg:'山林',
-    story:'晁盖、吴用等人得知梁中书要送十万贯生辰纲给蔡京，决定劫下这不义之财。\n吴用笑道："只需如此如此，管教那杨志插翅难飞。"',
-    enemies:[{name:'杨志',emoji:'⚔️',hp:600,atk:55,def:25,baseHp:600},{name:'军汉',emoji:'👤',hp:200,atk:35,def:12,baseHp:200},{name:'军汉',emoji:'👤',hp:200,atk:35,def:12,baseHp:200},{name:'虞候',emoji:'👤',hp:220,atk:38,def:14,baseHp:220}],
-    heroes:['wusong','luzhishen','linchong','wuyong'],joinHero:'wuyong',rewardExp:160},
-  {id:5,name:'三打祝家庄',title:'第五章',bg:'城寨',
-    story:'宋江率梁山好汉攻打祝家庄，庄内防守严密，前两次进攻均失利。\n宋江召集众将道："此战只许胜不许败！"',
-    enemies:[{name:'扈三娘',emoji:'⚔️',hp:550,atk:58,def:22,baseHp:550},{name:'祝彪',emoji:'🗡️',hp:500,atk:52,def:20,baseHp:500},{name:'庄丁',emoji:'👤',hp:200,atk:33,def:11,baseHp:200},{name:'庄丁',emoji:'👤',hp:200,atk:33,def:11,baseHp:200}],
-    heroes:['wusong','luzhishen','linchong','wuyong','liutang'],joinHero:'liutang',rewardExp:200},
-  {id:6,name:'大破连环马',title:'第六章',bg:'平原',
-    story:'呼延灼率连环马军来攻梁山，铁甲连环，势不可挡。\n宋江登高望之，忧心忡忡。众好汉摩拳擦掌，誓破敌军！',
-    enemies:[{name:'呼延灼',emoji:'⚔️',hp:700,atk:60,def:30,baseHp:700},{name:'骑兵',emoji:'🐴',hp:280,atk:42,def:18,baseHp:280},{name:'骑兵',emoji:'🐴',hp:280,atk:42,def:18,baseHp:280},{name:'骑兵',emoji:'🐴',hp:280,atk:42,def:18,baseHp:280}],
-    heroes:['wusong','luzhishen','linchong','wuyong','liutang','huaron'],joinHero:'huaron',rewardExp:250},
-  {id:7,name:'大战高俅',title:'第七章',bg:'官府',
-    story:'高俅亲率大军征讨梁山，气势汹汹。\n宋江擂鼓聚将："今日便是与那狗官做个了断的时候！"',
-    enemies:[{name:'高俅',emoji:'🎭',hp:800,atk:65,def:28,baseHp:800},{name:'禁军教头',emoji:'⚔️',hp:350,atk:48,def:20,baseHp:350},{name:'禁军教头',emoji:'⚔️',hp:350,atk:48,def:20,baseHp:350},{name:'禁军教头',emoji:'⚔️',hp:350,atk:48,def:20,baseHp:350},{name:'禁军教头',emoji:'⚔️',hp:350,atk:48,def:20,baseHp:350}],
-    heroes:['wusong','luzhishen','linchong','wuyong','liutang','huaron','likui'],joinHero:'likui',rewardExp:320},
-  {id:8,name:'征讨方腊',title:'终章',bg:'战场',
-    story:'梁山好汉奉旨征讨方腊，决战在即。\n宋江举杯："这一战后，不知几多兄弟还能同饮此酒。诸君，珍重！"',
-    enemies:[{name:'方腊',emoji:'👑',hp:1000,atk:75,def:35,baseHp:1000},{name:'大将',emoji:'⚔️',hp:400,atk:52,def:22,baseHp:400},{name:'大将',emoji:'⚔️',hp:400,atk:52,def:22,baseHp:400},{name:'大将',emoji:'⚔️',hp:400,atk:52,def:22,baseHp:400},{name:'大将',emoji:'⚔️',hp:400,atk:52,def:22,baseHp:400}],
-    heroes:['wusong','luzhishen','linchong','wuyong','liutang','huaron','likui','gongsunsheng'],joinHero:'gongsunsheng',rewardExp:400}
+// Equipment & Items
+const ITEMS = {
+  herb:{n:'草药',d:'回血50',type:'consume',effect:h=>{h.hp=Math.min(h.mhp,h.hp+50)}},
+  bigHerb:{n:'上等草药',d:'回血150',type:'consume',effect:h=>{h.hp=Math.min(h.mhp,h.hp+150)}},
+  pill:{n:'回气丹',d:'回SP20',type:'consume',effect:h=>{h.sp=Math.min(h.msp,h.sp+20)}},
+  ironSword:{n:'铁剑',d:'攻击+10',type:'weapon',atk:10},
+  steelSword:{n:'钢刀',d:'攻击+20',type:'weapon',atk:20},
+  silkRobe:{n:'丝绸甲',d:'防御+8',type:'armor',def:8},
+  ironArmor:{n:'铁甲',d:'防御+18',type:'armor',def:18},
+  tigerAmulet:{n:'虎符',d:'攻+5防+5',type:'accessory',atk:5,def:5}
+};
+
+const REGIONS = [
+  {id:'jingyang',n:'景阳冈地区',desc:'山林险峻，虎狼出没',bg:'m',lvMin:1,lvMax:5,reqLv:1,
+    story:"武松在柴进庄上结识宋江后，欲回清河县探望兄长。途经景阳冈时，酒家道："三碗不过冈，冈上有大虫！"\n武松笑道："某家曾走过千山万水，岂怕一虎？"",
+    bossS:"武松抡起哨棒，与那吊睛白额大虫斗在一处。那大虫一扑、一掀、一剪，武松一一闪过。\n瞅准时机，武松大喝一声，骑上虎背，铁拳如雨点般落下……",
+    enemies:[
+      {n:'野狼',e:'🐺',s:{hp:60,atk:16,def:6},exp:8,gold:3,drops:[{id:'herb',r:.25}]},
+      {n:'猛虎',e:'🐅',s:{hp:140,atk:28,def:12},exp:18,gold:8,drops:[{id:'herb',r:.4},{id:'tigerAmulet',r:.05}]},
+      {n:'山贼',e:'🗡️',s:{hp:90,atk:22,def:9},exp:12,gold:12,drops:[{id:'herb',r:.15},{id:'ironSword',r:.08}]},
+      {n:'蛇群',e:'🐍',s:{hp:50,atk:20,def:4},exp:10,gold:5,drops:[]},
+    ],eliteEnemies:[
+      {n:'虎王',e:'🐯',s:{hp:300,atk:38,def:18},exp:50,gold:25,drops:[{id:'bigHerb',r:.6},{id:'ironSword',r:.2}]},
+      {n:'山贼头目',e:'👺',s:{hp:200,atk:30,def:14},exp:40,gold:35,drops:[{id:'silkRobe',r:.15}]},
+    ],boss:{n:'吊睛白额虎',e:'🐅',s:{hp:500,atk:42,def:20},exp:200,gold:100,drops:[{id:'tigerAmulet',r:1}]},
+    bossClear:['wusong','linch']},
+  {id:'yanggu',n:'阳谷县',desc:'县衙昏暗，恶霸横行',bg:'c',lvMin:6,lvMax:12,reqLv:5,
+    story:"武松在阳谷县遇见了兄长武大郎。潘金莲见武松英雄气概，心生爱慕……\n西门庆与潘金莲勾结，毒死了武大郎。武松查明真相，怒不可遏！",
+    bossS:"西门庆武艺不俗，但在武松的怒火面前不堪一击。\n武松一脚踢飞西门庆手中的刀，抓住他的衣领："还我哥哥命来！"",
+    enemies:[
+      {n:'地痞',e:'👤',s:{hp:100,atk:24,def:10},exp:15,gold:10,drops:[{id:'herb',r:.2}]},
+      {n:'衙役',e:'👮',s:{hp:130,atk:28,def:14},exp:20,gold:15,drops:[{id:'herb',r:.25}]},
+      {n:'泼皮',e:'👺',s:{hp:110,atk:30,def:8},exp:18,gold:12,drops:[{id:'pill',r:.1}]},
+      {n:'恶奴',e:'💪',s:{hp:160,atk:32,def:12},exp:25,gold:18,drops:[{id:'ironSword',r:.1}]},
+    ],eliteEnemies:[
+      {n:'捕头',e:'⚔️',s:{hp:280,atk:38,def:18},exp:55,gold:35,drops:[{id:'bigHerb',r:.5},{id:'steelSword',r:.15}]},
+    ],boss:{n:'西门庆',e:'🎭',s:{hp:700,atk:48,def:24},exp:300,gold:150,drops:[{id:'silkRobe',r:1}]},
+    bossClear:['wusong','linch','luzh']},
+  {id:'dongjing',n:'东京城',desc:'皇城脚下，暗流涌动',bg:'c',lvMin:13,lvMax:20,reqLv:12,
+    story:"林冲被高俅陷害，刺配沧州。陆谦等人欲在野猪林加害于他。\n鲁智深一路暗中保护，大闹野猪林，救下林冲。",
+    bossS:"高俅调遣禁军围捕林冲和鲁智深。\n林冲挺枪怒喝："高俅老贼，某家今日便与你做个了断！"枪出如龙，直取高俅！",
+    enemies:[
+      {n:'禁军',e:'⚔️',s:{hp:160,atk:32,def:16},exp:25,gold:18,drops:[{id:'herb',r:.2},{id:'pill',r:.08}]},
+      {n:'差役',e:'👤',s:{hp:140,atk:28,def:12},exp:22,gold:14,drops:[{id:'herb',r:.3}]},
+      {n:'锦衣卫',e:'🎭',s:{hp:200,atk:36,def:18},exp:32,gold:25,drops:[{id:'bigHerb',r:.2},{id:'steelSword',r:.1}]},
+      {n:'恶霸',e:'💪',s:{hp:240,atk:40,def:14},exp:35,gold:22,drops:[{id:'ironArmor',r:.08}]},
+    ],eliteEnemies:[
+      {n:'禁军教头',e:'⚔️',s:{hp:380,atk:48,def:22},exp:65,gold:40,drops:[{id:'bigHerb',r:.5},{id:'ironArmor',r:.2}]},
+    ],boss:{n:'高俅',e:'🎭',s:{hp:900,atk:55,def:28},exp:400,gold:200,drops:[{id:'steelSword',r:1}]},
+    bossClear:['wusong','linch','luzh','wuyong']},
+  {id:'liangshan',n:'梁山泊',desc:'八百里水泊，群英汇聚',bg:'p',lvMin:21,lvMax:28,reqLv:20,
+    story:"宋江、吴用等人在梁山聚义，打出"替天行道"的大旗。\n四方好汉闻风而来，官兵屡次围剿都被击退。",
+    bossS:"晁盖在攻打曾头市时中箭身亡。\n宋江痛哭之后，接任寨主之位。他整顿军马，誓要为晁天王报仇！",
+    enemies:[
+      {n:'官兵',e:'🗡️',s:{hp:220,atk:36,def:18},exp:32,gold:22,drops:[{id:'bigHerb',r:.2},{id:'pill',r:.1}]},
+      {n:'水匪',e:'🏴‍☠️',s:{hp:200,atk:40,def:14},exp:35,gold:28,drops:[{id:'herb',r:.3}]},
+      {n:'流寇',e:'👺',s:{hp:250,atk:38,def:16},exp:38,gold:25,drops:[{id:'steelSword',r:.08}]},
+      {n:'刺客',e:'🗡️',s:{hp:180,atk:48,def:12},exp:40,gold:30,drops:[{id:'bigHerb',r:.25}]},
+    ],eliteEnemies:[
+      {n:'副将',e:'⚔️',s:{hp:450,atk:52,def:24},exp:75,gold:45,drops:[{id:'bigHerb',r:.5},{id:'ironArmor',r:.2}]},
+    ],boss:{n:'史文恭',e:'🎭',s:{hp:1100,atk:60,def:32},exp:500,gold:250,drops:[{id:'ironArmor',r:1}]},
+    bossClear:['wusong','linch','luzh','wuyong','liut']},
+  {id:'zhujia',n:'祝家庄',desc:'堡垒森严，三打方破',bg:'f',lvMin:29,lvMax:36,reqLv:28,
+    story:"祝家庄与梁山为敌，庄内机关重重。宋江率军攻打，前两次均失利。\n吴用献计，里应外合，终于攻破祝家庄。",
+    bossS:"扈三娘纵马舞刀，英姿飒爽。花荣一箭射落她的头盔，却不伤她分毫。\n"好武艺！"宋江赞叹，"这样的人才，何不归顺我梁山！"",
+    enemies:[
+      {n:'庄丁',e:'👤',s:{hp:260,atk:42,def:20},exp:38,gold:25,drops:[{id:'bigHerb',r:.2}]},
+      {n:'弓弩手',e:'🏹',s:{hp:220,atk:50,def:14},exp:42,gold:28,drops:[{id:'pill',r:.12}]},
+      {n:'刀斧手',e:'💪',s:{hp:320,atk:44,def:22},exp:45,gold:30,drops:[{id:'steelSword',r:.1}]},
+      {n:'机关兽',e:'🤖',s:{hp:380,atk:48,def:28},exp:50,gold:20,drops:[{id:'ironArmor',r:.08}]},
+    ],eliteEnemies:[
+      {n:'祝家将',e:'⚔️',s:{hp:500,atk:56,def:26},exp:85,gold:50,drops:[{id:'bigHerb',r:.5},{id:'steelSword',r:.2}]},
+    ],boss:{n:'扈三娘',e:'⚔️',s:{hp:1300,atk:65,def:35},exp:600,gold:300,drops:[{id:'steelSword',r:1}]},
+    bossClear:['wusong','linch','luzh','wuyong','liut','huar']},
+  {id:'daming',n:'大名府',desc:'繁华重镇，龙潭虎穴',bg:'c',lvMin:37,lvMax:44,reqLv:36,
+    story:"卢俊义被管家李固陷害，打入死牢。\n梁山好汉乔装打扮混入大名府，劫法场救出卢俊义。",
+    bossS:"梁中书调集大军围剿。呼延灼双鞭飞舞，如入无人之境。\n"今日便让尔等见识见识呼延家的鞭法！"",
+    enemies:[
+      {n:'守军',e:'🗡️',s:{hp:320,atk:48,def:22},exp:48,gold:32,drops:[{id:'bigHerb',r:.25},{id:'pill',r:.1}]},
+      {n:'铁甲兵',e:'🛡️',s:{hp:400,atk:42,def:32},exp:55,gold:35,drops:[{id:'ironArmor',r:.12}]},
+      {n:'江湖客',e:'🗡️',s:{hp:300,atk:55,def:18},exp:52,gold:38,drops:[{id:'steelSword',r:.12}]},
+      {n:'死士',e:'💀',s:{hp:280,atk:60,def:15},exp:58,gold:40,drops:[{id:'bigHerb',r:.3}]},
+    ],eliteEnemies:[
+      {n:'将军',e:'⚔️',s:{hp:600,atk:62,def:30},exp:100,gold:60,drops:[{id:'bigHerb',r:.5},{id:'ironArmor',r:.3}]},
+    ],boss:{n:'梁中书',e:'🎭',s:{hp:1600,atk:70,def:38},exp:800,gold:400,drops:[{id:'ironArmor',r:1}]},
+    bossClear:['wusong','linch','luzh','wuyong','liut','huar','likui']},
+  {id:'fangla',n:'江南征讨',desc:'血战方腊，生死离别',bg:'w',lvMin:45,lvMax:52,reqLv:44,
+    story:"梁山好汉奉旨征讨方腊。这一仗打得天昏地暗，许多兄弟血洒疆场。\n宋江含泪道："这一战后，不知几多兄弟还能同饮一杯。"",
+    bossS:"方腊站在城楼上，与宋江遥遥相望。\n最后的决战开始了！梁山好汉们奋勇争先，要为死去的兄弟报仇！",
+    enemies:[
+      {n:'南军',e:'🗡️',s:{hp:380,atk:55,def:26},exp:60,gold:38,drops:[{id:'bigHerb',r:.3},{id:'pill',r:.15}]},
+      {n:'精锐',e:'⚔️',s:{hp:450,atk:58,def:28},exp:68,gold:42,drops:[{id:'steelSword',r:.15},{id:'ironArmor',r:.1}]},
+      {n:'术士',e:'🔮',s:{hp:300,atk:65,def:20},exp:72,gold:45,drops:[{id:'bigHerb',r:.35},{id:'pill',r:.2}]},
+      {n:'战车',e:'🐴',s:{hp:500,atk:50,def:35},exp:65,gold:35,drops:[{id:'ironArmor',r:.15}]},
+    ],eliteEnemies:[
+      {n:'方腊大将',e:'👑',s:{hp:750,atk:72,def:34},exp:130,gold:70,drops:[{id:'bigHerb',r:.5},{id:'steelSword',r:.3},{id:'ironArmor',r:.25}]},
+    ],boss:{n:'方腊',e:'👑',s:{hp:2200,atk:82,def:42},exp:1200,gold:600,drops:[{id:'tigerAmulet',r:1}]},
+    bossClear:['wusong','linch','luzh','wuyong','liut','huar','likui']},
 ];
 
-// ===================== GAME STATE =====================
-let state = {
-  level:0,
-  heroes:{},
-  heroOrder:[],
-  enemies:[],
-  turnPhase:'idle', // idle | selecting | animating | ended
-  currentHeroIdx:0,
-  buffs:{},
-  logTimer:null
-};
+// ===================== STATE =====================
+let S={lv:1,exp:0,nexp:50,gold:0,mapIdx:0,heroes:{},order:[],inv:[],equip:{},
+  phase:'idle',battleIdx:0,enemies:[],buffs:{},logTimer:null,mapCleared:false,kills:0};
 
-// ===================== UTILITY =====================
-function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-function $(id){return document.getElementById(id)}
+const $=id=>document.getElementById(id);
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(arr){return arr[rnd(0,arr.length-1)]}
 
-function log(msg,delay=800){
-  const el=$('logText');
-  el.textContent=msg;
-  el.classList.add('show');
-  if(state.logTimer)clearTimeout(state.logTimer);
-  state.logTimer=setTimeout(()=>el.classList.remove('show'),delay);
+// Exp needed for each level
+function expFor(lv){return Math.floor(50*Math.pow(1.15,lv-1))}
+function statScale(lv,base){return Math.floor(base*(1+(lv-1)*.12))}
+
+// ===================== START =====================
+function startGame(){
+  $('titleS').style.display='none';
+  // Init hero
+  const ws=JSON.parse(JSON.stringify(H.wusong));
+  ws.lv=1;ws.exp=0;ws.hp=ws.s.mhp;ws.sp=ws.s.msp;
+  ws.atk=ws.s.atk;ws.def=ws.s.def;
+  S.heroes={wusong:ws};S.order=['wusong'];S.lv=1;S.exp=0;S.nexp=expFor(2);
+  S.gold=0;S.inv=[];S.equip={};S.kills=0;S.mapIdx=0;
+  showMap();
 }
 
-function floatDmg(x,y,text,cls){
-  const el=document.createElement('div');
-  el.className='dmg-float '+cls;
-  el.textContent=text;
-  el.style.left=x+'px';el.style.top=y+'px';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),800);
+// ===================== MAP =====================
+function showMap(){
+  const s=$('mapS');s.classList.add('active');
+  $('mapInfo').textContent=`等级${S.lv} | ${S.gold}金`;
+  const g=$('mapGrid');g.innerHTML='';
+  REGIONS.forEach((r,i)=>{
+    const done=i<S.mapIdx,curr=i===S.mapIdx,locked=i>S.mapIdx;
+    const d=document.createElement('div');
+    d.className='map-node'+(done?' cleared':'')+(curr?' curr':'')+(locked?' locked':'');
+    d.innerHTML=`<div class="mn-icon">${done?'✅':curr?'⚔️':'🔒'}</div>
+      <div class="mn-info">
+        <div class="mn-name">${r.n}</div>
+        <div class="mn-sub">${r.desc} · Lv${r.lvMin}-${r.lvMax}</div>
+        <div class="mn-status">${done?'已收复':curr?'当前区域':locked?'Lv'+r.reqLv+'解锁':''}</div>
+        <div class="mn-lv">推荐等级 ${r.reqLv}</div>
+      </div>`;
+    if(!locked)d.onclick=()=>{hideAll();showExplore(i);};
+    g.appendChild(d);
+  });
 }
 
-function calcDmg(atk,def,mult=1){
-  let base=Math.max(1,atk-def/2);
-  let variance=rand(-Math.floor(base*.15),Math.floor(base*.15));
-  return Math.floor((base+variance)*mult);
+function hideAll(){
+  document.querySelectorAll('.screen.active').forEach(e=>e.classList.remove('active'));
+}
+
+// ===================== EXPLORE =====================
+let exploreState={};
+
+function showExplore(idx){
+  S.mapIdx=idx;
+  const r=REGIONS[idx];
+  hideAll();$('expS').classList.add('active');
+  $('expTitle').textContent=r.n;
+  $('expSub').textContent=`Lv${r.lvMin}-${r.lvMax}`;
+  const area=$('expArea');
+  // Region scene
+  const scenes={'m':'⛰️','c':'🏘️','s':'❄️','p':'🌊','f':'🏰','w':'🔥'};
+  const sceneEmoji=scenes[r.bg]||'🗺️';
+
+  area.innerHTML=`<div class="exp-scene"></div>
+    <div class="exp-info">
+      <div class="exp-title">${sceneEmoji} ${r.n}</div>
+      <div class="exp-desc">${r.desc}</div>
+      <div class="exp-stats">
+        LV ${S.lv} | HP ${S.heroes[S.order[0]].hp}/${S.heroes[S.order[0]].mhp} | EXP ${S.exp}/${S.nexp}
+      </div>
+      <div class="exp-actions">
+        ${S.mapCleared?'':'<button class="exp-btn" ontouchstart="" onclick="exploreMap()">🌲 探索（随机遇敌）</button>'}
+        ${S.mapCleared?'<button class="exp-btn bt4" ontouchstart="" onclick="restartExplore()">🔄 继续探索</button>':''}
+        <button class="exp-btn bt2" ontouchstart="" onclick="openShop()">🏪 商店</button>
+        <button class="exp-btn bt3" ontouchstart="" onclick="openInventory()">🎒 背包</button>
+        ${!S.mapCleared?`<button class="exp-btn bt4" ontouchstart="" onclick="fightBoss()">👑 挑战首领</button>`:''}
+        <button class="exp-btn" ontouchstart="" onclick="backToMap()">↩ 返回地图</button>
+      </div>
+    </div>`;
+}
+
+function restartExplore(){
+  S.mapCleared=false;
+  showExplore(S.mapIdx);
+}
+
+function backToMap(){
+  hideAll();showMap();
+}
+
+// ===================== ENCOUNTER =====================
+function exploreMap(){
+  const r=REGIONS[S.mapIdx];
+  const roll=Math.random();
+  // 60% normal, 25% elite, 10% mini-boss, 5% rare encounter
+  let group=[];
+  if(roll<.6){ // Normal
+    const count=rnd(2,4);
+    for(let i=0;i<count;i++)group.push(pick(r.enemies));
+  }else if(roll<.85){ // Elite
+    group=[pick(r.eliteEnemies)];
+  }else if(roll<.95){ // Mixed
+    group=[pick(r.eliteEnemies),pick(r.enemies),pick(r.enemies)];
+  }else{ // Boss preview
+    group=[r.boss,pick(r.enemies)];
+  }
+  // Scale enemies to player level
+  group=group.map(e=>{
+    const e2=JSON.parse(JSON.stringify(e));
+    const lvScale=1+(S.lv-1)*.08;
+    e2.s={...e2.s,hp:Math.floor(e2.s.hp*lvScale),atk:Math.floor(e2.s.atk*lvScale),def:Math.floor(e2.s.def*lvScale)};
+    return e2;
+  });
+  startBattle(group,false);
+}
+
+function fightBoss(){
+  const r=REGIONS[S.mapIdx];
+  const boss=JSON.parse(JSON.stringify(r.boss));
+  const lvScale=1+(S.lv-1)*.1;
+  boss.s={...boss.s,hp:Math.floor(boss.s.hp*lvScale),atk:Math.floor(boss.s.atk*lvScale),def:Math.floor(boss.s.def*lvScale)};
+  startBattle([boss],true);
 }
 
 // ===================== BATTLE =====================
-function startGame(){
-  $('titleScreen').style.display='none';
-  state.level=0;
-  startLevel();
-}
+function startBattle(enemyData,isBoss){
+  S.phase='loading';
+  hideAll();$('battleS').classList.add('active');
 
-function startLevel(){
-  state.turnPhase='loading';
-  const lv=LEVELS[state.level];
-  $('levelName').textContent=lv.name;
-  $('levelNum').textContent=lv.title;
+  const r=REGIONS[S.mapIdx];
+  const scenes={m:'sbg-m',c:'sbg-c',s:'sbg-s',p:'sbg-p',f:'sbg-f',w:'sbg-w'};
+  $('btBg').className='battle-bg '+(scenes[r.bg]||'sbg-m');
+  $('btName').textContent=isBoss?'⚔️ 首领战 · '+r.boss.n:'⚔️ 遭遇战';
+  $('btChap').textContent=r.n;
 
   // Init heroes
-  state.heroes={};state.heroOrder=[];
-  // Pick the first 4 heroes available for this level
-  const available=lv.heroes.map(id=>JSON.parse(JSON.stringify(HERO_DATA[id])));
-  // Use up to 4 heroes
-  const party=available.slice(0,4);
-  party.forEach(h=>{
-    const s=h.stats;
-    state.heroes[h.name]={
-      id:h.name,emoji:h.emoji,stats:{...s,maxHp:s.hp,maxSp:s.sp},
-      skills:h.skills,alive:true,defending:false,owner:h.name
-    };
-    state.heroOrder.push(h.name);
+  S.order.forEach(id=>{
+    const h=S.heroes[id];
+    if(!h)return;
+    h.hp=Math.min(h.mhp,h.hp);
+    h.sp=Math.min(h.msp,h.sp);
+    h.defending=false;
+    h.alive=true;
   });
 
   // Init enemies
-  state.enemies=lv.enemies.map(e=>({
-    ...e,hp:e.hp,baseHp:e.hp,alive:true,defending:false
-  }));
+  S.enemies=enemyData.map((e,i)=>({...e,hp:e.s.hp,idx:i,alive:true,defending:false}));
+  S.buffs={};S.battleIdx=0;S.phase='idle';S.isBoss=isBoss;
 
-  state.buffs={};
-  state.currentHeroIdx=0;
-  state.turnPhase='story';
-
-  showStory(lv.story,()=>{
-    $('battleScreen').style.display='flex';
-    renderAll();
-    state.turnPhase='idle';
-    setTimeout(()=>startTurn(),300);
-  });
+  renderBattle();
+  if(isBoss && r.bossS){
+    showStoryText('⚔️ '+r.bossS,()=>{S.phase='idle';setTimeout(()=>startBTurn(),400);});
+  }else{
+    setTimeout(()=>startBTurn(),400);
+  }
 }
 
-function showStory(text,cb){
-  const el=$('storyScreen');
-  el.style.display='flex';
-  const lv=LEVELS[state.level];
-  el.innerHTML=`<div class="story-content">
-    <div class="story-title">${lv.title} · ${lv.name}</div>
-    <div class="story-text" id="storyLine0"></div>
-    <div class="story-text" id="storyLine1"></div>
-    <button class="story-continue" id="storyContinue" ontouchstart="">继续 ▶</button>
-  </div>`;
-  const lines=text.split('\n').filter(Boolean);
-  lines.forEach((line,i)=>{
-    setTimeout(()=>{
-      const s=$('storyLine'+i);
-      if(s){s.textContent=line;s.classList.add('show');}
-      if(i===lines.length-1){
-        setTimeout(()=>{$('storyContinue').classList.add('show')},400);
-      }
-    },i*600);
-  });
-  $('storyContinue').onclick=()=>{
-    el.style.display='none';
-    if(cb)cb();
-  };
-}
-
-function renderAll(){
-  renderEnemies();
-  renderHeroes();
-}
-
-function renderEnemies(){
-  const area=$('enemyArea');
-  const row=document.createElement('div');
-  row.className='enemy-row';
-  state.enemies.forEach((e,i)=>{
+function renderBattle(){
+  // Enemies
+  const row=$('eRow');row.innerHTML='';
+  S.enemies.forEach((e,i)=>{
     if(!e.alive)return;
-    const pct=Math.max(0,(e.hp/e.baseHp)*100);
-    row.innerHTML+=`<div class="enemy-unit" data-idx="${i}" id="enemy${i}">
-      <div class="enemy-icon">${e.emoji}</div>
-      <div class="enemy-name">${e.name}</div>
-      <div class="hp-bar"><div class="hp-bar-fill" style="width:${pct}%"></div></div>
-      <div class="enemy-hp-text">${Math.max(0,e.hp)}/${e.baseHp}</div>
+    const pct=Math.max(0,(e.hp/e.s.hp)*100);
+    row.innerHTML+=`<div class="e-unit" data-idx="${i}" id="eu${i}">
+      <div class="e-sprite"><span class="e-icon">${e.e}</span></div>
+      <div class="e-name">${e.n}</div>
+      <div class="hp-b"><div class="hp-f" style="width:${pct}%"></div></div>
+      <div class="e-hpt">${Math.max(0,e.hp)}/${e.s.hp}</div>
     </div>`;
   });
-  area.innerHTML='';
-  area.appendChild(row);
-}
-
-function renderHeroes(){
-  const area=$('heroArea');
-  area.innerHTML='';
-  state.heroOrder.forEach(name=>{
-    const h=state.heroes[name];
+  // Heroes
+  const hs=$('heroS');hs.innerHTML='';
+  S.order.forEach(id=>{
+    const h=S.heroes[id];
     if(!h||!h.alive)return;
-    const hpPct=Math.max(0,(h.stats.hp/h.stats.maxHp)*100);
-    const spPct=Math.max(0,(h.stats.sp/h.stats.maxSp)*100);
-    area.innerHTML+=`<div class="hero-unit" id="hero${name.replace(/\s/g,'')}">
-      <div class="hero-icon">${h.emoji}</div>
-      <div class="hero-info">
-        <div class="hero-name">${h.id}</div>
-        <div class="hero-stat-bar"><div class="hero-stat-fill hp" style="width:${hpPct}%"></div></div>
-        <div class="hero-stat-text"><span>${Math.max(0,h.stats.hp)}/${h.stats.maxHp}</span><span>SP ${Math.max(0,h.stats.sp)}/${h.stats.maxSp}</span></div>
+    const hpP=Math.max(0,(h.hp/h.mhp)*100);
+    const spP=Math.max(0,(h.sp/h.msp)*100);
+    hs.innerHTML+=`<div class="h-card" id="hc${id}">
+      <div class="hc-i">${h.e}</div>
+      <div class="hc-info">
+        <div class="hc-n">Lv${h.lv} ${h.n}</div>
+        <div class="hc-b"><div class="hc-f h" style="width:${hpP}%"></div></div>
+        <div class="hc-t"><span>${Math.max(0,h.hp)}/${h.mhp}</span><span>SP ${Math.max(0,h.sp)}/${h.msp}</span></div>
       </div>
     </div>`;
   });
 }
 
-function showSkillPanel(){
-  const panel=$('skillPanel');
-  const h=state.heroes[state.heroOrder[state.currentHeroIdx]];
-  if(!h)return;
-  panel.innerHTML='<button class="back-btn" ontouchstart="" onclick="hideSkills()">↩ 返回</button>';
-  h.skills.forEach((sk,i)=>{
-    const canUse=h.stats.sp>=sk.cost;
-    panel.innerHTML+=`<button class="skill-btn" ${canUse?'':'disabled'} ontouchstart="" onclick="doSkill(${i})">
-      <span class="skill-name">${sk.name}</span>
-      <span class="skill-cost">SP ${sk.cost} · ${sk.desc}</span>
-    </button>`;
-  });
-  panel.classList.add('show');
-  $('actionBar').style.display='none';
+let BLogTimer=null;
+function blog(msg,delay=500){
+  const el=$('logT');
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add('s');
+  if(BLogTimer)clearTimeout(BLogTimer);
+  if(delay)BLogTimer=setTimeout(()=>el.classList.remove('s'),delay);
 }
 
-function hideSkills(){
-  $('skillPanel').classList.remove('show');
-  $('actionBar').style.display='flex';
+function flashE(idx){
+  const el=$('eu'+idx);
+  if(el){el.classList.add('sk','fl');setTimeout(()=>el.classList.remove('sk','fl'),250);}
 }
 
-function showSkills(){
-  if(state.turnPhase!=='selecting')return;
-  showSkillPanel();
+function dmgF(x,y,t,c){
+  const el=document.createElement('div');
+  el.className='df '+c;
+  el.textContent=t;
+  el.style.left=x+'px';el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),700);
 }
 
-function doAction(type){
-  if(state.turnPhase!=='selecting')return;
-  const name=state.heroOrder[state.currentHeroIdx];
-  const h=state.heroes[name];
-  if(!h||!h.alive)return;
-
-  if(type==='defend'){
-    h.defending=true;
-    log(`${h.id} 摆出防御姿态！`);
-    advanceTurn();
-    return;
-  }
-
-  // Attack: need to select target
-  const targets=state.enemies.filter(e=>e.alive);
-  if(targets.length===0){advanceTurn();return;}
-  if(targets.length===1){
-    executeAttack(name,targets[0]);
-    return;
-  }
-  // Highlight enemies for targeting
-  state.turnPhase='targeting';
-  state._pendingAction=type;
-  state._pendingSkillIdx=null;
-  document.querySelectorAll('.enemy-unit').forEach(el=>{
-    el.classList.add('targetable');
-    el.onclick=()=>{
-      const idx=parseInt(el.dataset.idx);
-      const target=state.enemies[idx];
-      if(!target||!target.alive)return;
-      document.querySelectorAll('.enemy-unit').forEach(e=>{e.classList.remove('targetable');e.onclick=null});
-      state.turnPhase='selecting';
-      executeAttack(name,target);
-    };
-  });
+function calcD(atk,def,mult){
+  let b=Math.max(1,atk-def/2.5);
+  let v=rnd(-Math.floor(b*.1),Math.floor(b*.1));
+  return Math.max(1,Math.floor((b+v)*mult));
 }
 
-function doSkill(skillIdx){
-  if(state.turnPhase!=='selecting')return;
-  const name=state.heroOrder[state.currentHeroIdx];
-  const h=state.heroes[name];
-  if(!h||!h.alive)return;
-  const sk=h.skills[skillIdx];
-  if(!sk||h.stats.sp<sk.cost)return;
-
-  if(sk.healSp||sk.healAll){
-    // Support skill - use directly
-    executeSkill(name,skillIdx,null);
-    return;
-  }
-
-  hideSkills();
-
-  if(sk.aoe){
-    // AoE - use directly
-    executeSkill(name,skillIdx,null);
-    return;
-  }
-
-  // Single target: select
-  const targets=state.enemies.filter(e=>e.alive);
-  if(targets.length===0){startTurn();return;}
-  if(targets.length===1){
-    executeSkill(name,skillIdx,targets[0]);
-    return;
-  }
-  state.turnPhase='targeting';
-  state._pendingAction='skill';
-  state._pendingSkillIdx=skillIdx;
-  document.querySelectorAll('.enemy-unit').forEach(el=>{
-    el.classList.add('targetable');
-    el.onclick=()=>{
-      const idx=parseInt(el.dataset.idx);
-      const target=state.enemies[idx];
-      if(!target||!target.alive)return;
-      document.querySelectorAll('.enemy-unit').forEach(e=>{e.classList.remove('targetable');e.onclick=null});
-      state.turnPhase='selecting';
-      executeSkill(name,skillIdx,target);
-    };
-  });
-}
-
-function executeAttack(heroName,target){
-  state.turnPhase='animating';
-  const h=state.heroes[heroName];
-  const dmg=calcDmg(h.stats.atk,target.def||0);
-  const actualDmg=Math.min(dmg,target.hp);
-  target.hp-=actualDmg;
-  log(`${h.id} ⚔️ ${target.name}！造成 ${actualDmg} 点伤害！`);
-  flashEnemy(target);
-  renderAll();
-  if(!target.alive&&target.hp<=0){
-    target.alive=false;
-    log(`${target.name} 被击败！`);
-    renderAll();
-  }
-  checkBattleEnd();
-  if(state.turnPhase==='ended')return;
-  setTimeout(()=>advanceTurn(),600);
-}
-
-function executeSkill(heroName,skillIdx,target){
-  state.turnPhase='animating';
-  const h=state.heroes[heroName];
-  const sk=h.skills[skillIdx];
-
-  h.stats.sp=Math.max(0,h.stats.sp-sk.cost);
-
-  // Heal all
-  if(sk.healAll){
-    state.heroOrder.forEach(n=>{
-      const hh=state.heroes[n];
-      if(hh&&hh.alive)hh.stats.hp=Math.min(hh.stats.maxHp,hh.stats.hp+sk.healAll);
-    });
-    log(`${h.id} 发动【${sk.name}】，全体回复 ${sk.healAll} 气血！`);
-    renderAll();
-    setTimeout(()=>advanceTurn(),600);
-    return;
-  }
-
-  // Heal SP
-  if(sk.healSp){
-    state.heroOrder.forEach(n=>{
-      const hh=state.heroes[n];
-      if(hh&&hh.alive)hh.stats.sp=Math.min(hh.stats.maxSp,hh.stats.sp+sk.healSp);
-    });
-    log(`${h.id} 发动【${sk.name}】，全队回复 ${sk.healSp} SP！`);
-    renderAll();
-    setTimeout(()=>advanceTurn(),600);
-    return;
-  }
-
-  // AoE
-  if(sk.aoe){
-    const enemies=state.enemies.filter(e=>e.alive);
-    enemies.forEach(e=>{
-      const dmg=calcDmg(h.stats.atk,e.def||0,sk.mult);
-      const actual=Math.min(dmg,e.hp);
-      e.hp-=actual;
-      flashEnemy(e);
-    });
-    log(`${h.id} 发动【${sk.name}】，对所有敌人造成伤害！`);
-    renderAll();
-    enemies.forEach(e=>{if(e.hp<=0){e.alive=false;}});
-    checkBattleEnd();
-    if(state.turnPhase==='ended')return;
-    setTimeout(()=>advanceTurn(),800);
-    return;
-  }
-
-  // Buff self
-  if(sk.buff){
-    const name=sk.buff;
-    const amt=sk.buffAmt;
-    state.buffs[heroName]=state.buffs[heroName]||{};
-    state.buffs[heroName][name]=(state.buffs[heroName][name]||0)+amt;
-    log(`${h.id} 发动【${sk.name}】，${name==='def'?'防御':'攻击'}提升 ${amt}！`);
-    renderAll();
-    setTimeout(()=>advanceTurn(),600);
-    return;
-  }
-
-  // Debuff enemy
-  if(sk.debuff){
-    const enemies=state.enemies.filter(e=>e.alive);
-    enemies.forEach(e=>{
-      const name=sk.debuff;
-      e[name]=(e[name]||0)+sk.debuffAmt;
-    });
-    log(`${h.id} 发动【${sk.name}】，敌人${sk.debuff==='atk'?'攻击':'防御'}降低！`);
-    renderAll();
-    setTimeout(()=>advanceTurn(),600);
-    return;
-  }
-
-  // Single target damage
-  if(!target||!target.alive){advanceTurn();return;}
-  const hits=sk.hits||1;
-  let totalDmg=0;
-  for(let i=0;i<hits;i++){
-    const dmg=calcDmg(h.stats.atk,target.def||0,sk.mult);
-    const actual=Math.min(dmg,target.hp);
-    target.hp-=actual;
-    totalDmg+=actual;
-    if(target.hp<=0){target.alive=false;break;}
-  }
-  log(`${h.id} 发动【${sk.name}】${hits>1?'('+hits+'连击)':''}！造成 ${totalDmg} 点伤害！`);
-  flashEnemy(target);
-  renderAll();
-  if(!target.alive)log(`${target.name} 被击败！`);
-  checkBattleEnd();
-  if(state.turnPhase==='ended')return;
-  renderAll();
-
-  // Lifesteal
-  if(sk.lifesteal){
-    const heal=Math.floor(totalDmg*sk.lifesteal);
-    h.stats.hp=Math.min(h.stats.maxHp,h.stats.hp+heal);
-    renderAll();
-  }
-
-  // Self damage
-  if(sk.selfDmg){
-    const selfDmg=Math.floor(h.stats.maxHp*sk.selfDmg);
-    h.stats.hp=Math.max(1,h.stats.hp-selfDmg);
-    renderAll();
-  }
-
-  setTimeout(()=>advanceTurn(),800);
-}
-
-function flashEnemy(target){
-  const idx=state.enemies.indexOf(target);
-  if(idx>=0){
-    const el=$('enemy'+idx);
-    if(el){el.classList.add('shake','flash');setTimeout(()=>el.classList.remove('shake','flash'),300);}
-  }
-}
-
-function advanceTurn(){
-  if(state.turnPhase==='ended')return;
-  state.currentHeroIdx++;
-  startTurn();
-}
-
-function startTurn(){
-  if(state.turnPhase==='ended')return;
-
-  // Find next alive hero
-  while(state.currentHeroIdx<state.heroOrder.length){
-    const h=state.heroes[state.heroOrder[state.currentHeroIdx]];
+function startBTurn(){
+  if(S.phase==='ended')return;
+  S.battleIdx=0;
+  while(S.battleIdx<S.order.length){
+    const h=S.heroes[S.order[S.battleIdx]];
     if(h&&h.alive){
-      state.turnPhase='selecting';
-      const name=state.heroOrder[state.currentHeroIdx];
-      log(`轮到 ${name} 行动`,500);
-      renderAll();
+      S.phase='selecting';
+      blog(`→ ${h.n} 如何行动？`,0);
+      renderBattle();
       return;
     }
-    state.currentHeroIdx++;
+    S.battleIdx++;
   }
-
-  // All heroes acted → enemy turn
-  state.turnPhase='animating';
-  log('敌人发动攻击！',500);
-  setTimeout(()=>enemyTurn(),600);
+  S.phase='animating';
+  blog('敌军进攻！');setTimeout(()=>enemyBTurn(),500);
 }
 
-function enemyTurn(){
-  if(state.turnPhase==='ended')return;
+function advBTurn(){
+  if(S.phase==='ended')return;
+  S.battleIdx++;
+  startBTurn();
+}
 
-  state.enemies.forEach(e=>{
-    if(!e.alive)return;
-    // Pick a random alive hero
-    const aliveHeroes=state.heroOrder.filter(n=>state.heroes[n]&&state.heroes[n].alive);
-    if(aliveHeroes.length===0)return;
-    const target=aliveHeroes[rand(0,aliveHeroes.length-1)];
-    const h=state.heroes[target];
-
-    let atk=e.atk||45;
-    if(e.atkBuff)atk+=e.atkBuff;
-    let defMul=1;
-    if(h.defending){defMul=.4;h.defending=false;}
-    let defVal=h.stats.def;
-    if(state.buffs[target]&&state.buffs[target].def)defVal+=state.buffs[target].def;
-
-    const dmg=calcDmg(atk,defVal)*defMul;
-    const actual=Math.min(Math.floor(dmg),h.stats.hp);
-    h.stats.hp-=actual;
-    log(`${e.name} 🗡️ ${h.id}！造成 ${actual} 点伤害！`);
-    renderAll();
-    if(h.stats.hp<=0){
-      h.alive=false;
-      log(`${h.id} 倒下了！`);
-      renderAll();
-    }
+function showSk(){
+  if(S.phase!=='selecting')return;
+  const id=S.order[S.battleIdx];const h=S.heroes[id];
+  if(!h)return;
+  const p=$('skP');p.innerHTML='<button class="bk-btn" ontouchstart="" onclick="hideSk()">↩</button>';
+  h.sk.forEach((sk,i)=>{
+    const ok=h.sp>=sk.c;
+    p.innerHTML+=`<button class="sk-btn" ${ok?'':'disabled'} ontouchstart="" onclick="doSk(${i})">
+      <span class="skn">${sk.n}</span><span class="skc">SP${sk.c} ${sk.d}</span></button>`;
   });
+  p.classList.add('s');$('actB').style.display='none';
+}
+function hideSk(){$('skP').classList.remove('s');$('actB').style.display='flex';}
 
-  // Check defeat
-  const alive=state.heroOrder.filter(n=>state.heroes[n]&&state.heroes[n].alive);
-  if(alive.length===0){
-    battleDefeat();
+function doA(type){
+  if(S.phase!=='selecting')return;
+  const id=S.order[S.battleIdx];const h=S.heroes[id];
+  if(!h||!h.alive)return;
+  if(type==='def'){h.defending=true;blog(`${h.n} 防御！`);advBTurn();return;}
+  const alive=S.enemies.filter(e=>e.alive);
+  if(!alive.length){advBTurn();return;}
+  if(alive.length===1){execAtk(id,alive[0]);return;}
+  S.phase='targeting';S._act='atk';
+  document.querySelectorAll('.e-unit').forEach(el=>{
+    el.classList.add('tg');
+    el.onclick=()=>{
+      const ei=parseInt(el.dataset.idx);const t=S.enemies[ei];
+      if(!t||!t.alive)return;
+      document.querySelectorAll('.e-unit').forEach(e=>{e.classList.remove('tg');e.onclick=null});
+      S.phase='selecting';execAtk(id,t);
+    };
+  });
+}
+
+function execAtk(id,target){
+  S.phase='animating';
+  const h=S.heroes[id];let atk=h.atk||h.s.atk;
+  if(S.equip[id]&&S.equip[id].atk)atk+=S.equip[id].atk;
+  const dmg=calcD(atk,target.def||target.s.def);
+  const act=Math.min(dmg,target.hp);
+  target.hp-=act;
+  blog(`${h.n} ⚔️ ${target.n}！${act} 伤害！`);
+  const ei=S.enemies.indexOf(target);flashE(ei);
+  renderBattle();
+  if(target.hp<=0){target.alive=false;blog(`${target.n} 被击败！`);renderBattle();}
+  if(!checkBEnd())setTimeout(()=>advBTurn(),450);
+}
+
+function doSk(skIdx){
+  if(S.phase!=='selecting')return;
+  const id=S.order[S.battleIdx];const h=S.heroes[id];
+  if(!h||!h.alive)return;
+  const sk=h.sk[skIdx];if(!sk||h.sp<sk.c)return;
+  hideSk();
+  h.sp-=sk.c;
+
+  if(sk.ao){ // AoE
+    S.phase='animating';
+    S.enemies.filter(e=>e.alive).forEach(e=>{
+      const d=calcD(h.atk||h.s.atk,e.def||e.s.def,sk.m);
+      e.hp=Math.max(0,e.hp-Math.min(d,e.hp));e.alive=e.hp>0;
+    });
+    blog(`${h.n} 【${sk.n}】群攻全敌！`);
+    renderBattle();
+    S.enemies.forEach(e=>{if(e.hp<=0&&e.alive!==false)e.alive=false;});
+    renderBattle();
+    if(!checkBEnd())setTimeout(()=>advBTurn(),500);
     return;
   }
-
-  // Reset for next player turn
-  state.currentHeroIdx=0;
-  state.turnPhase='idle';
-  setTimeout(()=>startTurn(),500);
+  if(sk.hs){ // Heal SP
+    S.order.forEach(n=>{const hh=S.heroes[n];if(hh&&hh.alive)hh.sp=Math.min(hh.msp,hh.sp+sk.hs);});
+    blog(`${h.n} 【${sk.n}】回${sk.hs}SP！`);
+    renderBattle();setTimeout(()=>advBTurn(),400);
+    return;
+  }
+  if(sk.bf){ // Buff
+    S.buffs[id]=S.buffs[id]||{};S.buffs[id][sk.bf]=(S.buffs[id][sk.bf]||0)+sk.ba;
+    blog(`${h.n} 【${sk.n}】${sk.bf==='def'?'防':'攻'}+${sk.ba}！`);
+    renderBattle();setTimeout(()=>advBTurn(),400);
+    return;
+  }
+  if(sk.db){ // Debuff
+    S.enemies.filter(e=>e.alive).forEach(e=>{e.def=(e.def||e.s.def)+sk.da;});
+    blog(`${h.n} 【${sk.n}】敌${sk.db==='atk'?'攻':'防'}降！`);
+    renderBattle();setTimeout(()=>advBTurn(),400);
+    return;
+  }
+  if(sk.sd){ // Self-damage
+    const sdmg=Math.floor(h.mhp*sk.sd);h.hp=Math.max(1,h.hp-sdmg);
+  }
+  // Single target damage
+  const alive=S.enemies.filter(e=>e.alive);
+  if(!alive.length){startBTurn();return;}
+  if(alive.length===1){execSkDmg(id,sk,alive[0]);return;}
+  S.phase='targeting';S._act='sk';S._ski=skIdx;
+  document.querySelectorAll('.e-unit').forEach(el=>{
+    el.classList.add('tg');
+    el.onclick=()=>{
+      const ei=parseInt(el.dataset.idx);const t=S.enemies[ei];
+      if(!t||!t.alive)return;
+      document.querySelectorAll('.e-unit').forEach(e=>{e.classList.remove('tg');e.onclick=null});
+      S.phase='selecting';execSkDmg(id,sk,t);
+    };
+  });
 }
 
-function checkBattleEnd(){
-  const alive=state.enemies.filter(e=>e.alive);
-  if(alive.length===0){
-    state.turnPhase='ended';
-    setTimeout(()=>battleVictory(),500);
-    return true;
+function execSkDmg(id,sk,target){
+  S.phase='animating';
+  const h=S.heroes[id];let atk=h.atk||h.s.atk;
+  if(S.equip[id]&&S.equip[id].atk)atk+=S.equip[id].atk;
+  const hits=sk.hi||1;let tot=0;
+  for(let i=0;i<hits&&target.alive;i++){
+    const d=calcD(atk,target.def||target.s.def,sk.m);
+    const a=Math.min(d,target.hp);target.hp-=a;tot+=a;
+    if(target.hp<=0)target.alive=false;
   }
+  blog(`${h.n} 【${sk.n}】${tot} 伤害！`);
+  const ei=S.enemies.indexOf(target);flashE(ei);
+  if(sk.ls){const hl=Math.floor(tot*sk.ls);h.hp=Math.min(h.mhp,h.hp+hl);}
+  if(sk.sd)h.hp=Math.max(1,h.hp-Math.floor(h.mhp*sk.sd));
+  renderBattle();
+  S.enemies.forEach(e=>{if(e.hp<=0)e.alive=false;});
+  renderBattle();
+  if(!checkBEnd())setTimeout(()=>advBTurn(),500);
+}
+
+function enemyBTurn(){
+  if(S.phase==='ended')return;
+  S.enemies.forEach(e=>{
+    if(!e.alive||!e.s)return;
+    const alive=S.order.filter(n=>S.heroes[n]&&S.heroes[n].alive);
+    if(!alive.length)return;
+    const t=S.heroes[pick(alive)];
+    let atk=e.s.atk;
+    let dm=1;
+    if(t.defending){dm=.4;t.defending=false;}
+    let de=t.def||t.s.def;
+    if(S.buffs[t.n]&&S.buffs[t.n].def)de+=S.buffs[t.n].def;
+    const d=Math.min(Math.floor(calcD(atk,de)*dm),t.hp);
+    t.hp-=d;
+    blog(`${e.n} 🗡️ ${t.n}！${d} 伤害！`);
+    renderBattle();
+    if(t.hp<=0){t.alive=false;blog(`${t.n} 倒下了！`);renderBattle();}
+  });
+  const alive=S.order.filter(n=>S.heroes[n]&&S.heroes[n].alive);
+  if(!alive.length){battleBEnd(false);return;}
+  S.battleIdx=0;S.phase='idle';
+  setTimeout(()=>startBTurn(),400);
+}
+
+function checkBEnd(){
+  if(!S.enemies.filter(e=>e.alive).length){S.phase='ended';setTimeout(()=>battleBEnd(true),300);return true;}
   return false;
 }
 
-function battleVictory(){
-  const lv=LEVELS[state.level];
-  const el=$('resultScreen');
-  el.style.display='flex';
-
-  // Get new hero info
-  const newHeroId=lv.joinHero;
-  let newHeroText='';
-  if(newHeroId){
-    const nh=HERO_DATA[newHeroId];
-    newHeroText=`<div class="result-new-hero">🎉 ${nh.name}（${nh.title}）加入队伍！</div>`;
-  }
-
-  const isLast=state.level>=LEVELS.length-1;
-  el.innerHTML=`<div class="result-title victory">🎊 胜利！</div>
-    <div class="result-detail">通关 ${lv.name}</div>
-    <div class="result-detail">获得经验 ${lv.rewardExp}</div>
-    ${newHeroText}
-    <button class="result-btn" id="resultBtn" ontouchstart="">${isLast?'🎉 通关！重新开始':'下一关 ▶'}</button>`;
-
-  $('resultBtn').onclick=()=>{
-    el.style.display='none';
-    $('battleScreen').style.display='none';
-    if(isLast){
-      state.level=0;
-    }else{
-      state.level++;
+function battleBEnd(win){
+  S.phase='ended';
+  const r=REGIONS[S.mapIdx];
+  if(win){
+    // Calc rewards
+    let totExp=0,totGold=0,drops=[];
+    S.enemies.forEach(e=>{
+      totExp+=e.exp||0;
+      totGold+=e.gold||0;
+      if(e.drops) e.drops.forEach(d=>{
+        if(Math.random()<d.r)drops.push(d.id);
+      });
+    });
+    // Apply EXP
+    const hero=S.heroes[S.order[0]];
+    hero.exp=(hero.exp||0)+totExp;
+    while(hero.exp>=expFor(hero.lv+1)){
+      hero.exp-=expFor(hero.lv+1);
+      hero.lv++;
+      hero.mhp=Math.floor(hero.s.mhp*(1+(hero.lv-1)*.1));
+      hero.msp=hero.s.msp;
+      hero.atk=Math.floor(hero.s.atk*(1+(hero.lv-1)*.08));
+      hero.def=Math.floor(hero.s.def*(1+(hero.lv-1)*.08));
+      hero.hp=hero.mhp;hero.sp=hero.msp;
     }
-    startLevel();
-  };
+    S.exp=hero.exp;S.lv=hero.lv;
+    S.gold+=totGold;
+    S.kills=(S.kills||0)+S.enemies.filter(e=>e.alive!==false).length;
+
+    // Show reward
+    showReward(totExp,totGold,drops);
+    if(S.isBoss){
+      S.mapCleared=true;
+      showStoryText(`🎉 击败了 ${r.boss.n}！\n${REGIONS[S.mapIdx+1]?'解锁了下一个区域！':'恭喜通关！'}`,null);
+      // Unlock next area
+      if(S.mapIdx<REGIONS.length-1)setTimeout(()=>{S.mapIdx++;showMap();},100);
+    }
+  }else{
+    // Defeat - recover and retry
+    S.order.forEach(n=>{const h=S.heroes[n];if(h)h.hp=Math.floor(h.mhp*.5);});
+    hideAll();$('resultS').classList.add('active');
+    $('resultS').innerHTML=`<div class="ri">💀</div>
+      <div class="rt l">败 阵</div>
+      <div class="rd">在 ${r.n} 中全体阵亡</div>
+      <div class="rd">气血已恢复 50%</div>
+      <button class="rb" ontouchstart="" onclick="retryBattle()">🔄 重新挑战</button>`;
+  }
 }
 
-function battleDefeat(){
-  const lv=LEVELS[state.level];
-  const el=$('resultScreen');
-  el.style.display='flex';
-  el.innerHTML=`<div class="result-title defeat">💀 败阵</div>
-    <div class="result-detail">在 ${lv.name} 中全体阵亡</div>
-    <button class="result-btn" id="resultRetry" ontouchstart="">🔄 重新挑战</button>`;
-  $('resultRetry').onclick=()=>{
-    el.style.display='none';
-    $('battleScreen').style.display='none';
-    startLevel();
-  };
+function retryBattle(){
+  hideAll();
+  if(S.isBoss)fightBoss();
+  else showExplore(S.mapIdx);
 }
+
+function showReward(exp,gold,drops){
+  hideAll();$('rewardS').classList.add('active');
+  let html=`<div class="reward-b">
+    <div class="rw-title">🏆 战斗胜利</div>
+    <div class="rw-item">EXP +${exp} （Lv.${S.lv}）</div>
+    <div class="rw-item">💰 +${gold} 金（共${S.gold}金）</div>`;
+  if(drops.length){
+    const items=drops.map(id=>ITEMS[id]).filter(Boolean);
+    items.forEach(item=>{
+      html+=`<div class="rw-item">🎁 获得 ${item.n}（${item.d}）</div>`;
+      S.inv.push(id);
+    });
+  }
+  html+=`<button class="rw-btn" ontouchstart="" onclick="afterReward()">继 续</button></div>`;
+  $('rewardS').innerHTML=html;
+}
+
+function afterReward(){
+  if(S.isBoss){
+    hideAll();
+    setTimeout(()=>{hideAll();showMap();},100);
+  }else{
+    hideAll();showExplore(S.mapIdx);
+  }
+}
+
+function showStoryText(text,cb){
+  hideAll();$('storyS').classList.add('active');
+  const lines=text.split('\n').filter(Boolean);
+  $('storyS').innerHTML=`<div class="story-b">
+    <div class="sti">📜 剧情</div>
+    ${lines.map((_,i)=>`<div class="sl" id="ssl${i}"></div>`).join('')}
+    <button class="story-btn" id="ssBtn">继续 ▶</button>
+  </div>`;
+  lines.forEach((t,i)=>{
+    setTimeout(()=>{
+      const el=$('ssl'+i);
+      if(el){el.textContent=t;el.classList.add('s');}
+      if(i===lines.length-1)setTimeout(()=>{$('ssBtn').classList.add('s');},300);
+    },i*500);
+  });
+  $('ssBtn').onclick=()=>{hideAll();if(cb)cb();};
+}
+
+// ===================== SHOP =====================
+const SHOP_ITEMS=[{id:'herb',c:15},{id:'bigHerb',c:40},{id:'pill',c:25},
+  {id:'ironSword',c:80},{id:'steelSword',c:200},{id:'silkRobe',c:60},{id:'ironArmor',c:150}];
+
+function openShop(){
+  hideAll();$('rewardS').classList.add('active');
+  const r=REGIONS[S.mapIdx];
+  let html=`<div class="reward-b">
+    <div class="rw-title">🏪 货郎 · ${r.n}</div>
+    <div class="rw-item" style="border:none;color:#888">💰 ${S.gold} 金</div>`;
+  const avail=SHOP_ITEMS.filter((_,i)=>i<=S.mapIdx*2+2);
+  avail.forEach(si=>{
+    const item=ITEMS[si.id];
+    const has=S.inv.filter(i=>i===si.id).length;
+    html+=`<div class="rw-item" style="display:flex;justify-content:space-between;align-items:center">
+      <span>${item.n} - ${item.d}</span>
+      <span><button ontouchstart="" onclick="buyItem('${si.id}',${si.c})" style="background:#dc2626;border:none;color:#f5e6c8;padding:4px 12px;border-radius:2px;font-family:inherit;font-size:13px;cursor:pointer">${si.c}金</button></span>
+    </div>`;
+  });
+  html+=`<button class="rw-btn" ontouchstart="" onclick="closeShop()">关 闭</button></div>`;
+  $('rewardS').innerHTML=html;
+}
+
+function buyItem(id,cost){
+  if(S.gold<cost){blog('金不够！',1500);return;}
+  S.gold-=cost;
+  S.inv.push(id);
+  blog(`购买了 ${ITEMS[id].n}！`);
+  openShop();
+}
+
+function closeShop(){hideAll();showExplore(S.mapIdx);}
+
+// ===================== INVENTORY =====================
+function openInventory(){
+  hideAll();$('rewardS').classList.add('active');
+  const grouped={};
+  S.inv.forEach(id=>{grouped[id]=(grouped[id]||0)+1;});
+  let html=`<div class="reward-b">
+    <div class="rw-title">🎒 背包</div>`;
+  let has=false;
+  Object.entries(grouped).forEach(([id,cnt])=>{
+    const item=ITEMS[id];
+    if(!item)return;
+    has=true;
+    const hero=S.heroes[S.order[0]];
+    const canUse=item.type==='consume'||item.type==='weapon'||item.type==='armor';
+    html+=`<div class="rw-item" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <span>${item.n} ×${cnt} <span style="color:#888;font-size:12px">${item.d}</span></span>
+      <span>${canUse?`<button ontouchstart="" onclick="useItem('${id}','${item.type}')" style="background:#2563eb;border:none;color:#fff;padding:4px 12px;border-radius:2px;font-family:inherit;font-size:12px;cursor:pointer">使用</button>`:''}</span>
+    </div>`;
+  });
+  if(!has)html+=`<div class="rw-item" style="color:#666">背包空空如也</div>`;
+  html+=`<button class="rw-btn" ontouchstart="" onclick="closeInv()">关 闭</button></div>`;
+  $('rewardS').innerHTML=html;
+}
+
+function useItem(id,type){
+  const idx=S.inv.lastIndexOf(id);
+  if(idx<0)return;
+  S.inv.splice(idx,1);
+  const hero=S.heroes[S.order[0]];
+  if(type==='consume'){
+    const item=ITEMS[id];
+    if(item.effect)item.effect(hero);
+    blog(`使用了 ${item.n}！`,1000);
+  }else{
+    S.equip[S.order[0]]=S.equip[S.order[0]]||{};
+    const item=ITEMS[id];
+    S.equip[S.order[0]][type]=id;
+    if(item.atk)blog(`装备${item.n}，攻击+${item.atk}`,1000);
+    else if(item.def)blog(`装备${item.n}，防御+${item.def}`,1000);
+  }
+  openInventory();
+}
+
+function closeInv(){hideAll();showExplore(S.mapIdx);}
 </script>
 </body>
 </html>
