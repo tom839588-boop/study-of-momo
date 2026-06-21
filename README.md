@@ -5,3 +5,4 @@
 ## 目录
 
 - [wechat-mp](./wechat-mp/) — 微信公众号排版与草稿箱推送工具
+- [token-monitor](./token-monitor/) — DeepSeek API 余额监控 macOS 菜单栏工具
