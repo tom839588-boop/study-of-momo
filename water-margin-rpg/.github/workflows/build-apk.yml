@@ -3,16 +3,11 @@ on:
   push:
     paths:
       - 'water-margin-rpg/**'
-      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: water-margin-rpg
-
     steps:
       - uses: actions/checkout@v4
 
@@ -25,82 +20,53 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Generate launcher icon
+      - name: Install Android SDK components
         run: |
+          yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
+
+      - name: Create launcher icon
+        run: |
+          cd water-margin-rpg
           mkdir -p android/app/src/main/res/mipmap-hdpi
-          # Create a minimal red PNG icon using base64 (16x16 red square as placeholder)
-          # A real icon would be designed; this works for initial build
-          echo "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAFklEQVQ4y2P4z8BQz0BKYBg1YNQAkgAAX5AD/8OTiJEAAAAASUVORK5CYII=" | base64 -d > android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/
-          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/
-          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/
-          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/
+          # Minimal 48x48 red PNG as placeholder icon
+          python3 -c "
+import base64, struct, zlib
+def create_png(w,h,color):
+    def chunk(ct,data):
+        c=ct+data
+        return struct.pack('>I',len(data))+c+struct.pack('>I',zlib.crc32(c)&0xffffffff)
+    sig=b'\\x89PNG\\r\\n\\x1a\\n'
+    ihdr=struct.pack('>IIBBBBB',w,h,8,2,0,0,0)
+    raw=b''
+    for y in range(h):
+        raw+=b'\\x00'
+        for x in range(w):
+            raw+=bytes(color)
+    return sig+chunk(b'IHDR',ihdr)+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
+  for d in ['mipmap-hdpi','mipmap-mdpi','mipmap-xhdpi','mipmap-xxhdpi','mipmap-xxxhdpi']:
+    with open(f'android/app/src/main/res/{d}/ic_launcher.png','wb') as f:
+      f.write(create_png(48,48,(180,30,30)))
+  "
+          ls android/app/src/main/res/mipmap-hdpi/ic_launcher.png
 
       - name: Copy web assets
         run: |
-          mkdir -p android/app/src/main/assets
-          cp www/index.html android/app/src/main/assets/index.html
+          mkdir -p water-margin-rpg/android/app/src/main/assets
+          cp water-margin-rpg/www/index.html water-margin-rpg/android/app/src/main/assets/index.html
 
-      - name: Generate Gradle Wrapper
-        run: |
-          cd android
-          # Download gradle wrapper jar
-          curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle-8.5-bin.zip
-          # Use gradle wrapper task if gradle is available, else create manually
-          if ! command -v gradle &> /dev/null; then
-            # Manual wrapper setup
-            cat > gradlew << 'GRADLEW_EOF'
-#!/bin/sh
-APP_NAME="Gradle"
-APP_BASE_NAME=$(basename "$0")
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
-DIRNAME=$(dirname "$0")
-APP_HOME=$(cd "$DIRNAME" && pwd)
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-if [ -f "$CLASSPATH" ]; then
-  java $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-else
-  echo "Gradle wrapper jar not found. Building with direct gradle..."
-  # If gradle is available, use it directly
-  cd "$APP_HOME"
-  ./gradlew-not-found build || true
-fi
-GRADLEW_EOF
-            chmod +x gradlew
-          fi
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.5
 
       - name: Build APK
         run: |
-          cd android
-          # Use direct gradle command since wrapper may not work
-          # Install Android SDK components needed
-          yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
-          export ANDROID_HOME=$ANDROID_SDK_ROOT
-          # Try to build with gradle
-          chmod +x gradlew || true
-          if [ -f gradlew ] && [ -f gradle/wrapper/gradle-wrapper.jar ]; then
-            ./gradlew assembleRelease
-          else
-            # Fallback: use gradle directly if available
-            if command -v gradle &> /dev/null; then
-              gradle assembleRelease
-            else
-              echo "No gradle available, trying manual APK build..."
-              # Install gradle
-              curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle.zip
-              unzip -q /tmp/gradle.zip -d /tmp/
-              /tmp/gradle-8.5/bin/gradle assembleRelease
-            fi
-          fi
-
-      - name: Sign APK (debug)
-        run: |
-          # APK is already signed with debug key
-          echo "APK built with debug signature"
+          cd water-margin-rpg/android
+          ANDROID_HOME=$ANDROID_SDK_ROOT gradle assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: water-margin-rpg
+          name: water-margin-rpg-apk
           path: water-margin-rpg/android/app/build/outputs/apk/release/*.apk
-          if-no-files-found: warn
+          if-no-files-found: error
