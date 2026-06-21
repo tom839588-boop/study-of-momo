@@ -6,3 +6,4 @@
 
 - [wechat-mp](./wechat-mp/) — 微信公众号排版与草稿箱推送工具
 - [token-monitor](./token-monitor/) — DeepSeek API 余额监控 macOS 菜单栏工具
+- [water-margin-rpg](./water-margin-rpg/) — 水浒英雄传回合制 RPG（可生成 Android APK）
