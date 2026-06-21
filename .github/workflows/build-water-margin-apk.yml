@@ -27,27 +27,27 @@ jobs:
       - name: Create launcher icon
         run: |
           cd water-margin-rpg
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          # Minimal 48x48 red PNG as placeholder icon
-          python3 -c "
-import base64, struct, zlib
-def create_png(w,h,color):
-    def chunk(ct,data):
-        c=ct+data
-        return struct.pack('>I',len(data))+c+struct.pack('>I',zlib.crc32(c)&0xffffffff)
-    sig=b'\\x89PNG\\r\\n\\x1a\\n'
+          mkdir -p android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
+          # Generate minimal 48x48 red PNG icon
+          python3 << 'PYEOF'
+import struct, zlib
+def create_png(w,h,r,g,b):
+    sig=b'\x89PNG\r\n\x1a\n'
     ihdr=struct.pack('>IIBBBBB',w,h,8,2,0,0,0)
     raw=b''
     for y in range(h):
-        raw+=b'\\x00'
+        raw+=b'\x00'
         for x in range(w):
-            raw+=bytes(color)
+            raw+=bytes([r,g,b])
+    def chunk(ct,data):
+        c=ct+data
+        return struct.pack('>I',len(data))+c+struct.pack('>I',zlib.crc32(c)&0xffffffff)
     return sig+chunk(b'IHDR',ihdr)+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
-  for d in ['mipmap-hdpi','mipmap-mdpi','mipmap-xhdpi','mipmap-xxhdpi','mipmap-xxxhdpi']:
+png=create_png(48,48,180,30,30)
+for d in ['mipmap-hdpi','mipmap-mdpi','mipmap-xhdpi','mipmap-xxhdpi','mipmap-xxxhdpi']:
     with open(f'android/app/src/main/res/{d}/ic_launcher.png','wb') as f:
-      f.write(create_png(48,48,(180,30,30)))
-  "
-          ls android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+        f.write(png)
+PYEOF
 
       - name: Copy web assets
         run: |
