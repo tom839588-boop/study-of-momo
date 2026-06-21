@@ -236,8 +236,8 @@ const ITEMS = {
 
 const REGIONS = [
   {id:'jingyang',n:'景阳冈地区',desc:'山林险峻，虎狼出没',bg:'m',lvMin:1,lvMax:5,reqLv:1,
-    story:"武松在柴进庄上结识宋江后，欲回清河县探望兄长。途经景阳冈时，酒家道："三碗不过冈，冈上有大虫！"\n武松笑道："某家曾走过千山万水，岂怕一虎？"",
-    bossS:"武松抡起哨棒，与那吊睛白额大虫斗在一处。那大虫一扑、一掀、一剪，武松一一闪过。\n瞅准时机，武松大喝一声，骑上虎背，铁拳如雨点般落下……",
+    story:'武松在柴进庄上结识宋江后，欲回清河县探望兄长。途经景阳冈时，酒家道：「三碗不过冈，冈上有大虫！」\n武松笑道：「某家曾走过千山万水，岂怕一虎？」',
+    bossS:'武松抡起哨棒，与那吊睛白额大虫斗在一处。那大虫一扑、一掀、一剪，武松一一闪过。\n瞅准时机，武松大喝一声，骑上虎背，铁拳如雨点般落下……',
     enemies:[
       {n:'野狼',e:'🐺',s:{hp:60,atk:16,def:6},exp:8,gold:3,drops:[{id:'herb',r:.25}]},
       {n:'猛虎',e:'🐅',s:{hp:140,atk:28,def:12},exp:18,gold:8,drops:[{id:'herb',r:.4},{id:'tigerAmulet',r:.05}]},
@@ -249,8 +249,8 @@ const REGIONS = [
     ],boss:{n:'吊睛白额虎',e:'🐅',s:{hp:500,atk:42,def:20},exp:200,gold:100,drops:[{id:'tigerAmulet',r:1}]},
     bossClear:['wusong','linch']},
   {id:'yanggu',n:'阳谷县',desc:'县衙昏暗，恶霸横行',bg:'c',lvMin:6,lvMax:12,reqLv:5,
-    story:"武松在阳谷县遇见了兄长武大郎。潘金莲见武松英雄气概，心生爱慕……\n西门庆与潘金莲勾结，毒死了武大郎。武松查明真相，怒不可遏！",
-    bossS:"西门庆武艺不俗，但在武松的怒火面前不堪一击。\n武松一脚踢飞西门庆手中的刀，抓住他的衣领："还我哥哥命来！"",
+    story:'武松在阳谷县遇见了兄长武大郎。潘金莲见武松英雄气概，心生爱慕……\n西门庆与潘金莲勾结，毒死了武大郎。武松查明真相，怒不可遏！',
+    bossS:'西门庆武艺不俗，但在武松的怒火面前不堪一击。\n武松一脚踢飞西门庆手中的刀，抓住他的衣领：「还我哥哥命来！」',
     enemies:[
       {n:'地痞',e:'👤',s:{hp:100,atk:24,def:10},exp:15,gold:10,drops:[{id:'herb',r:.2}]},
       {n:'衙役',e:'👮',s:{hp:130,atk:28,def:14},exp:20,gold:15,drops:[{id:'herb',r:.25}]},
@@ -261,8 +261,8 @@ const REGIONS = [
     ],boss:{n:'西门庆',e:'🎭',s:{hp:700,atk:48,def:24},exp:300,gold:150,drops:[{id:'silkRobe',r:1}]},
     bossClear:['wusong','linch','luzh']},
   {id:'dongjing',n:'东京城',desc:'皇城脚下，暗流涌动',bg:'c',lvMin:13,lvMax:20,reqLv:12,
-    story:"林冲被高俅陷害，刺配沧州。陆谦等人欲在野猪林加害于他。\n鲁智深一路暗中保护，大闹野猪林，救下林冲。",
-    bossS:"高俅调遣禁军围捕林冲和鲁智深。\n林冲挺枪怒喝："高俅老贼，某家今日便与你做个了断！"枪出如龙，直取高俅！",
+    story:'林冲被高俅陷害，刺配沧州。陆谦等人欲在野猪林加害于他。\n鲁智深一路暗中保护，大闹野猪林，救下林冲。',
+    bossS:'高俅调遣禁军围捕林冲和鲁智深。\n林冲挺枪怒喝：「高俅老贼，某家今日便与你做个了断！」枪出如龙，直取高俅！',
     enemies:[
       {n:'禁军',e:'⚔️',s:{hp:160,atk:32,def:16},exp:25,gold:18,drops:[{id:'herb',r:.2},{id:'pill',r:.08}]},
       {n:'差役',e:'👤',s:{hp:140,atk:28,def:12},exp:22,gold:14,drops:[{id:'herb',r:.3}]},
@@ -273,8 +273,8 @@ const REGIONS = [
     ],boss:{n:'高俅',e:'🎭',s:{hp:900,atk:55,def:28},exp:400,gold:200,drops:[{id:'steelSword',r:1}]},
     bossClear:['wusong','linch','luzh','wuyong']},
   {id:'liangshan',n:'梁山泊',desc:'八百里水泊，群英汇聚',bg:'p',lvMin:21,lvMax:28,reqLv:20,
-    story:"宋江、吴用等人在梁山聚义，打出"替天行道"的大旗。\n四方好汉闻风而来，官兵屡次围剿都被击退。",
-    bossS:"晁盖在攻打曾头市时中箭身亡。\n宋江痛哭之后，接任寨主之位。他整顿军马，誓要为晁天王报仇！",
+    story:'宋江、吴用等人在梁山聚义，打出「替天行道」的大旗。\n四方好汉闻风而来，官兵屡次围剿都被击退。',
+    bossS:'晁盖在攻打曾头市时中箭身亡。\n宋江痛哭之后，接任寨主之位。他整顿军马，誓要为晁天王报仇！',
     enemies:[
       {n:'官兵',e:'🗡️',s:{hp:220,atk:36,def:18},exp:32,gold:22,drops:[{id:'bigHerb',r:.2},{id:'pill',r:.1}]},
       {n:'水匪',e:'🏴‍☠️',s:{hp:200,atk:40,def:14},exp:35,gold:28,drops:[{id:'herb',r:.3}]},
@@ -285,8 +285,8 @@ const REGIONS = [
     ],boss:{n:'史文恭',e:'🎭',s:{hp:1100,atk:60,def:32},exp:500,gold:250,drops:[{id:'ironArmor',r:1}]},
     bossClear:['wusong','linch','luzh','wuyong','liut']},
   {id:'zhujia',n:'祝家庄',desc:'堡垒森严，三打方破',bg:'f',lvMin:29,lvMax:36,reqLv:28,
-    story:"祝家庄与梁山为敌，庄内机关重重。宋江率军攻打，前两次均失利。\n吴用献计，里应外合，终于攻破祝家庄。",
-    bossS:"扈三娘纵马舞刀，英姿飒爽。花荣一箭射落她的头盔，却不伤她分毫。\n"好武艺！"宋江赞叹，"这样的人才，何不归顺我梁山！"",
+    story:'祝家庄与梁山为敌，庄内机关重重。宋江率军攻打，前两次均失利。\n吴用献计，里应外合，终于攻破祝家庄。',
+    bossS:'扈三娘纵马舞刀，英姿飒爽。花荣一箭射落她的头盔，却不伤她分毫。\n「好武艺！」宋江赞叹，「这样的人才，何不归顺我梁山！」',
     enemies:[
       {n:'庄丁',e:'👤',s:{hp:260,atk:42,def:20},exp:38,gold:25,drops:[{id:'bigHerb',r:.2}]},
       {n:'弓弩手',e:'🏹',s:{hp:220,atk:50,def:14},exp:42,gold:28,drops:[{id:'pill',r:.12}]},
@@ -297,8 +297,8 @@ const REGIONS = [
     ],boss:{n:'扈三娘',e:'⚔️',s:{hp:1300,atk:65,def:35},exp:600,gold:300,drops:[{id:'steelSword',r:1}]},
     bossClear:['wusong','linch','luzh','wuyong','liut','huar']},
   {id:'daming',n:'大名府',desc:'繁华重镇，龙潭虎穴',bg:'c',lvMin:37,lvMax:44,reqLv:36,
-    story:"卢俊义被管家李固陷害，打入死牢。\n梁山好汉乔装打扮混入大名府，劫法场救出卢俊义。",
-    bossS:"梁中书调集大军围剿。呼延灼双鞭飞舞，如入无人之境。\n"今日便让尔等见识见识呼延家的鞭法！"",
+    story:'卢俊义被管家李固陷害，打入死牢。\n梁山好汉乔装打扮混入大名府，劫法场救出卢俊义。',
+    bossS:'梁中书调集大军围剿。呼延灼双鞭飞舞，如入无人之境。\n「今日便让尔等见识见识呼延家的鞭法！」',
     enemies:[
       {n:'守军',e:'🗡️',s:{hp:320,atk:48,def:22},exp:48,gold:32,drops:[{id:'bigHerb',r:.25},{id:'pill',r:.1}]},
       {n:'铁甲兵',e:'🛡️',s:{hp:400,atk:42,def:32},exp:55,gold:35,drops:[{id:'ironArmor',r:.12}]},
@@ -309,8 +309,8 @@ const REGIONS = [
     ],boss:{n:'梁中书',e:'🎭',s:{hp:1600,atk:70,def:38},exp:800,gold:400,drops:[{id:'ironArmor',r:1}]},
     bossClear:['wusong','linch','luzh','wuyong','liut','huar','likui']},
   {id:'fangla',n:'江南征讨',desc:'血战方腊，生死离别',bg:'w',lvMin:45,lvMax:52,reqLv:44,
-    story:"梁山好汉奉旨征讨方腊。这一仗打得天昏地暗，许多兄弟血洒疆场。\n宋江含泪道："这一战后，不知几多兄弟还能同饮一杯。"",
-    bossS:"方腊站在城楼上，与宋江遥遥相望。\n最后的决战开始了！梁山好汉们奋勇争先，要为死去的兄弟报仇！",
+    story:'梁山好汉奉旨征讨方腊。这一仗打得天昏地暗，许多兄弟血洒疆场。\n宋江含泪道：「这一战后，不知几多兄弟还能同饮一杯。」',
+    bossS:'方腊站在城楼上，与宋江遥遥相望。\n最后的决战开始了！梁山好汉们奋勇争先，要为死去的兄弟报仇！',
     enemies:[
       {n:'南军',e:'🗡️',s:{hp:380,atk:55,def:26},exp:60,gold:38,drops:[{id:'bigHerb',r:.3},{id:'pill',r:.15}]},
       {n:'精锐',e:'⚔️',s:{hp:450,atk:58,def:28},exp:68,gold:42,drops:[{id:'steelSword',r:.15},{id:'ironArmor',r:.1}]},
