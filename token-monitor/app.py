@@ -108,13 +108,13 @@ class TokenMonitorApp(rumps.App):
         curr_drop = cfg["single_drop_threshold"]
 
         for val in DAILY_THRESHOLD_OPTIONS:
-            label = f"{val:.0f} 元"
+            label = f"{val:g} 元"
             item = rumps.MenuItem(label)
             self.daily_threshold_items[val] = item
             self.daily_threshold_menu.add(item)
 
         for val in DROP_THRESHOLD_OPTIONS:
-            label = f"{val:.0f} 元"
+            label = f"{val:g} 元"
             item = rumps.MenuItem(label)
             self.drop_threshold_items[val] = item
             self.drop_threshold_menu.add(item)
@@ -196,7 +196,7 @@ class TokenMonitorApp(rumps.App):
         if drop >= cfg["single_drop_threshold"]:
             self._alert(
                 "⚠️ 大额消费",
-                f"单次刷新发现余额下降 ¥{drop:.2f}，超过阈值 ¥{cfg['single_drop_threshold']:.0f}",
+                f"单次刷新发现余额下降 ¥{drop:.2f}，超过阈值 ¥{cfg['single_drop_threshold']:g}",
             )
 
         # 3) 每日消费超限
@@ -204,7 +204,7 @@ class TokenMonitorApp(rumps.App):
         if today["estimated_cost"] >= cfg["daily_threshold"]:
             self._alert(
                 "⚠️ 日消费超限",
-                f"今日累计消费 ¥{today['estimated_cost']:.2f}，超过阈值 ¥{cfg['daily_threshold']:.0f}",
+                f"今日累计消费 ¥{today['estimated_cost']:.2f}，超过阈值 ¥{cfg['daily_threshold']:g}",
             )
 
     def _alert(self, title: str, message: str):
@@ -297,18 +297,22 @@ class TokenMonitorApp(rumps.App):
     # ---- Daily threshold settings ----
 
     @rumps.clicked("10 元")
+    @rumps.clicked("0.5 元")
+    @rumps.clicked("1 元")
+    @rumps.clicked("5 元")
+    @rumps.clicked("10 元")
     @rumps.clicked("20 元")
     @rumps.clicked("50 元")
-    @rumps.clicked("100 元")
-    @rumps.clicked("200 元")
     def on_daily_threshold(self, sender):
         value = float(sender.title.replace("元", "").strip())
         set_daily_alert_threshold(value)
-        self.daily_threshold_menu.title = f"每日消费告警阈值（{value:.0f}元）"
-        rumps.notification("告警阈值", "", f"每日消费阈值设为 ¥{value:.0f}")
+        self.daily_threshold_menu.title = f"每日消费告警阈值（{value:g}元）"
+        rumps.notification("告警阈值", "", f"每日消费阈值设为 ¥{value:g}")
 
     # ---- Drop threshold settings ----
 
+    @rumps.clicked("0.5 元")
+    @rumps.clicked("1 元")
     @rumps.clicked("5 元")
     @rumps.clicked("10 元")
     @rumps.clicked("20 元")
@@ -316,7 +320,7 @@ class TokenMonitorApp(rumps.App):
     def on_drop_threshold(self, sender):
         value = float(sender.title.replace("元", "").strip())
         set_single_drop_alert_threshold(value)
-        self.drop_threshold_menu.title = f"单次大额消费告警阈值（{value:.0f}元）"
+        self.drop_threshold_menu.title = f"单次大额消费告警阈值（{value:g}元）"
         rumps.notification("告警阈值", "", f"单次消费阈值设为 ¥{value:.0f}")
 
     # ---- Refresh interval settings ----

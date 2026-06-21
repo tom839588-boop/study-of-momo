@@ -82,5 +82,5 @@ def set_single_drop_alert_threshold(value: float) -> None:
     save_config(cfg)
 
 
-DAILY_THRESHOLD_OPTIONS = [10.0, 20.0, 50.0, 100.0, 200.0]
-DROP_THRESHOLD_OPTIONS = [5.0, 10.0, 20.0, 50.0]
+DAILY_THRESHOLD_OPTIONS = [0.5, 1.0, 5.0, 10.0, 20.0, 50.0]
+DROP_THRESHOLD_OPTIONS = [0.5, 1.0, 5.0, 10.0, 20.0, 50.0]
